@@ -1,0 +1,5 @@
+javac -cp "lib/*" -d bin src/java/**/*.java src/java/*.java
+java -cp "bin:lib/*" src.java.MainApp
+
+docker exec -it voyage_postgres psql -U postgres -d voyage_db
+docker exec -it oracle sqlplus voyage_user/voyage_pass@//localhost:1521/EE.oracle.docker
