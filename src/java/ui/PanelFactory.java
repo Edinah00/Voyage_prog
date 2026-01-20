@@ -19,6 +19,7 @@ public class PanelFactory {
         JButton btnGererPause,
         JButton btnReinitialiser,  
         Runnable onVoitureChange,
+
         Runnable onReinitialiser   
     ) {
         JPanel panel = new JPanel();
@@ -55,25 +56,25 @@ public class PanelFactory {
         txtHeureDepart.setToolTipText("Format: HH:mm (ex: 08:30)");
         selectionPanel.add(txtHeureDepart);
 
-        btnRechercher.setBackground(new Color(76, 175, 80));
+        btnRechercher.setBackground(new Color(120, 120, 120));
         btnRechercher.setForeground(Color.WHITE);
         btnRechercher.setFont(new Font("Arial", Font.BOLD, 12));
         btnRechercher.setFocusPainted(false);
         selectionPanel.add(btnRechercher);
 
-        btnGererLavaka.setBackground(new Color(255, 152, 0));
+        btnGererLavaka.setBackground(new Color(120, 120, 120));
         btnGererLavaka.setForeground(Color.WHITE);
         btnGererLavaka.setFont(new Font("Arial", Font.BOLD, 12));
         btnGererLavaka.setFocusPainted(false);
         selectionPanel.add(btnGererLavaka);
 
-        btnGererPause.setBackground(new Color(156, 39, 176));
+        btnGererPause.setBackground(new Color(120, 120, 120));
         btnGererPause.setForeground(Color.WHITE);
         btnGererPause.setFont(new Font("Arial", Font.BOLD, 12));
         btnGererPause.setFocusPainted(false);
         selectionPanel.add(btnGererPause);
 
-        btnReinitialiser.setBackground(new Color(158, 158, 158));
+        btnReinitialiser.setBackground(new Color(120, 120, 120));
         btnReinitialiser.setForeground(Color.WHITE);
         btnReinitialiser.setFont(new Font("Arial", Font.BOLD, 12));
         btnReinitialiser.setFocusPainted(false);
@@ -97,6 +98,9 @@ public class PanelFactory {
         JLabel lblTemps,
         JLabel lblPosition,
         JLabel lblVitesse,
+        JLabel lblVitesseMoyenneReelle,
+         JButton btnDetailsVitesse,
+
         JLabel lblCarburant,
         Runnable onCheminRepaint
     ) {
@@ -184,7 +188,9 @@ public class PanelFactory {
         panelInfos.add(lblVitesse);
         panelInfos.add(Box.createVerticalStrut(5));
         panelInfos.add(lblCarburant);
-
+        panelInfos.add(lblVitesseMoyenneReelle);
+            panelInfos.add(Box.createVerticalStrut(5));
+            panelInfos.add(btnDetailsVitesse);
         panel.add(lblChemins);
         panel.add(Box.createVerticalStrut(5));
         panel.add(scrollPane);
@@ -193,7 +199,6 @@ public class PanelFactory {
         panel.add(Box.createVerticalStrut(10));
         panel.add(panelInfos);
         panel.add(Box.createVerticalGlue());
-
         return panel;
     }
 }

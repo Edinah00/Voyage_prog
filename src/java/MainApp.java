@@ -36,12 +36,12 @@ public class MainApp extends JFrame {
     private JLabel lblCarburant;
     private JLabel lblHeureActuelle;
     private JLabel lblHeureArrivee;
-    
+    private JLabel lblVitesseMoyenneReelle;
     private JComboBox<String> cbCheminPause;
     private JTextField txtPositionPause;
     private JTextField txtHeureDebutPause;
     private JTextField txtHeureFinPause;
-    private JButton btnReinitialiser;  
+    private JButton btnReinitialiser;
 
     private List<String> extremites;
     private List<Lalana> lalanas;
@@ -72,55 +72,60 @@ public class MainApp extends JFrame {
         cbVoiture = new JComboBox<>();
         txtVitesseMoyenne = new JTextField("80");
         txtHeureDepart = new JTextField(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
-        
+
         btnRechercher = new JButton("Rechercher Chemins");
         btnRechercher.addActionListener(e -> rechercherChemins());
-        
+
         JButton btnGererLavaka = new JButton("Gerer Lavaka");
         btnGererLavaka.addActionListener(e -> ouvrirGestionLavaka());
-        
+
         JButton btnGererPause = new JButton("Gerer Pauses");
         btnGererPause.addActionListener(e -> ouvrirGestionPause());
 
         btnReinitialiser = new JButton("Reinitialiser");
-        
+
         listModel = new DefaultListModel<>();
         listChemins = new JList<>(listModel);
-        
+
         btnDemarrer = new JButton("Demarrer");
         btnDemarrer.addActionListener(e -> demarrerVoyage());
-        
+
         btnArreter = new JButton("Arreter");
         btnArreter.addActionListener(e -> arreterVoyage());
-        
+        JButton btnDetailsVitesse = new JButton("Détails Vitesse");
+        btnDetailsVitesse.addActionListener(e -> afficherDetailsVitesse());
+
         lblHeureActuelle = new JLabel("Heure actuelle: --:--");
         lblHeureArrivee = new JLabel("Arrivee estimee: --:--");
         lblTemps = new JLabel("Temps ecoule: 0.00 h");
         lblPosition = new JLabel("Position: 0.0 / 0.0 km");
         lblVitesse = new JLabel("Vitesse: 0.0 km/h");
         lblCarburant = new JLabel("Carburant: 0.0 L");
+        lblVitesseMoyenneReelle = new JLabel("Vitesse moyenne réelle: -- km/h");
+        lblVitesseMoyenneReelle.setFont(new Font("Arial", Font.BOLD, 12));
 
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         mainPanel.add(PanelFactory.creerPanelHaut(
-            cbDepart, cbArrivee, cbVoiture, txtVitesseMoyenne, txtHeureDepart,
-            btnRechercher, btnGererLavaka, btnGererPause, btnReinitialiser,
-            () -> {
-                mettreAJourVitesseMoyenne();
-                mettreAJourListeChemins();
-            },
-            () -> reinitialiser()  
-        ), BorderLayout.NORTH);
+                cbDepart, cbArrivee, cbVoiture, txtVitesseMoyenne, txtHeureDepart,
+                btnRechercher, btnGererLavaka, btnGererPause, btnReinitialiser, 
+                () -> {
+                    mettreAJourVitesseMoyenne();
+                    mettreAJourListeChemins();
+                },
+                () -> reinitialiser()), BorderLayout.NORTH);
 
         mainPanel.add(PanelFactory.creerPanelGauche(
-            listModel, listChemins,
-            btnDemarrer, btnArreter,
-            lblHeureActuelle, lblHeureArrivee, lblTemps, lblPosition, lblVitesse, lblCarburant,
-            () -> {
-                panelChemin.setCheminSelectionne(listChemins.getSelectedValue());
-                panelChemin.repaint();
-            }
+                listModel, listChemins,
+                btnDemarrer, btnArreter,
+                lblHeureActuelle, lblHeureArrivee, lblTemps, lblPosition, lblVitesse, lblCarburant,
+                btnDetailsVitesse,lblVitesseMoyenneReelle,
+                () -> {
+                    panelChemin.setCheminSelectionne(listChemins.getSelectedValue());
+                    panelChemin.repaint();
+                }
+
         ), BorderLayout.WEST);
 
         panelChemin = new CheminPanel();
@@ -138,26 +143,129 @@ public class MainApp extends JFrame {
         initialiserComboBoxes();
     }
 
-   private void initialiserComboBoxes() {
-    if (extremites == null || extremites.isEmpty()) {
-        showError("Aucune extrémité trouvée dans la base.");
-        return;
+    private void afficherVitesseReelleCheminSelectionne() {
+        CheminItem selected = listChemins.getSelectedValue();
+        if (selected == null) {
+            lblVitesseMoyenneReelle.setText("Vitesse moyenne réelle: -- km/h");
+            return;
+        }
+
+        Voiture voiture = (Voiture) cbVoiture.getSelectedItem();
+        if (voiture == null) {
+            return;
+        }
+
+        try {
+            double vitesseMoyenne = Double.parseDouble(txtVitesseMoyenne.getText().trim());
+            LocalTime heureDepart = LocalTime.parse(txtHeureDepart.getText().trim(),
+                    DateTimeFormatter.ofPattern("HH:mm"));
+
+            String depart = (String) cbDepart.getSelectedItem();
+            String arrivee = (String) cbArrivee.getSelectedItem();
+
+            // Créer un voyage temporaire pour le calcul
+            Voyage voyageTemp = new Voyage(depart, arrivee, voiture, vitesseMoyenne, heureDepart);
+            voyageTemp.setCheminChoisi(selected.getChemin());
+
+            // Calculer la vitesse réelle
+            double vitesseReelle = voiture.calculerVitesseMoyenneReelle(voyageTemp);
+
+            // Afficher
+            lblVitesseMoyenneReelle.setText(
+                    String.format("Vitesse moyenne réelle: %.2f km/h", vitesseReelle));
+
+            // Colorer en fonction de la différence
+            double difference = vitesseMoyenne - vitesseReelle;
+            if (difference > 10) {
+                lblVitesseMoyenneReelle.setForeground(Color.RED);
+            } else if (difference > 5) {
+                lblVitesseMoyenneReelle.setForeground(new Color(255, 140, 0)); // Orange
+            } else {
+                lblVitesseMoyenneReelle.setForeground(new Color(0, 150, 0)); // Vert
+            }
+
+        } catch (Exception ex) {
+            lblVitesseMoyenneReelle.setText("Vitesse moyenne réelle: -- km/h");
+            lblVitesseMoyenneReelle.setForeground(Color.BLACK);
+        }
     }
-    for (String ext : extremites) {
-        cbDepart.addItem(ext);
-        cbArrivee.addItem(ext);
+
+    private void initialiserComboBoxes() {
+        if (extremites == null || extremites.isEmpty()) {
+            showError("Aucune extrémité trouvée dans la base.");
+            return;
+        }
+        for (String ext : extremites) {
+            cbDepart.addItem(ext);
+            cbArrivee.addItem(ext);
+        }
+        for (Voiture v : voitures) {
+            cbVoiture.addItem(v);
+        }
+        mettreAJourVitesseMoyenne();
     }
-    for (Voiture v : voitures) {
-        cbVoiture.addItem(v);
-    }
-    mettreAJourVitesseMoyenne();
-}
 
     private void mettreAJourVitesseMoyenne() {
         Voiture voiture = (Voiture) cbVoiture.getSelectedItem();
         if (voiture != null) {
-            txtVitesseMoyenne.setText(String.valueOf((int)voiture.getVitesseMaximale()));
+            txtVitesseMoyenne.setText(String.valueOf((int) voiture.getVitesseMaximale()));
         }
+    }
+
+    private void afficherDetailsVitesse() {
+        CheminItem cheminItem = listChemins.getSelectedValue();
+
+        if (cheminItem == null) {
+            showError("Veuillez sélectionner un chemin dans la liste");
+            return;
+        }
+
+        Voiture voiture = (Voiture) cbVoiture.getSelectedItem();
+        if (voiture == null) {
+            showError("Veuillez sélectionner une voiture");
+            return;
+        }
+
+        double vitesseMoyenne;
+        try {
+            vitesseMoyenne = Double.parseDouble(txtVitesseMoyenne.getText().trim());
+        } catch (NumberFormatException e) {
+            showError("Vitesse moyenne invalide");
+            return;
+        }
+
+        LocalTime heureDepart;
+        try {
+            heureDepart = LocalTime.parse(txtHeureDepart.getText().trim(),
+                    DateTimeFormatter.ofPattern("HH:mm"));
+        } catch (DateTimeParseException e) {
+            heureDepart = LocalTime.now();
+        }
+
+        // Créer un voyage temporaire
+        String depart = (String) cbDepart.getSelectedItem();
+        String arrivee = (String) cbArrivee.getSelectedItem();
+
+        Voyage voyageTemp = new Voyage(depart, arrivee, voiture, vitesseMoyenne, heureDepart);
+        voyageTemp.setCheminChoisi(cheminItem.getChemin());
+
+        // Générer les détails
+        String details = voiture.afficherDetailsVitesseMoyenne(voyageTemp);
+
+        // Afficher dans une fenêtre
+        JTextArea textArea = new JTextArea(details);
+        textArea.setEditable(false);
+        textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        textArea.setBackground(new Color(240, 240, 240));
+
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setPreferredSize(new Dimension(700, 550));
+
+        JOptionPane.showMessageDialog(
+                this,
+                scrollPane,
+                "📊 Détails de la Vitesse Moyenne Réelle",
+                JOptionPane.INFORMATION_MESSAGE);
     }
 
     private void chargerDonnees() {
@@ -176,7 +284,7 @@ public class MainApp extends JFrame {
 
             VoitureDAO voitureDAO = new VoitureDAO();
             voitures = voitureDAO.findAll();
-System.out.println("Extrémités chargées : " + extremites);
+            System.out.println("Extrémités chargées : " + extremites);
 
         } catch (Exception e) {
             showError("Erreur chargement donnees: " + e.getMessage());
@@ -213,7 +321,7 @@ System.out.println("Extrémités chargées : " + extremites);
             }
             if (vitesseMoyenne > voiture.getVitesseMaximale()) {
                 showError("La vitesse moyenne (" + vitesseMoyenne + " km/h) ne peut pas depasser\n" +
-                         "la vitesse maximale de la voiture (" + voiture.getVitesseMaximale() + " km/h)");
+                        "la vitesse maximale de la voiture (" + voiture.getVitesseMaximale() + " km/h)");
                 return;
             }
         } catch (NumberFormatException e) {
@@ -274,7 +382,7 @@ System.out.println("Extrémités chargées : " + extremites);
             }
             if (vitesseMoyenne > voiture.getVitesseMaximale()) {
                 showError("La vitesse moyenne (" + vitesseMoyenne + " km/h) ne peut pas depasser\n" +
-                         "la vitesse maximale de la voiture (" + voiture.getVitesseMaximale() + " km/h)");
+                        "la vitesse maximale de la voiture (" + voiture.getVitesseMaximale() + " km/h)");
                 return;
             }
         } catch (NumberFormatException e) {
@@ -292,8 +400,8 @@ System.out.println("Extrémités chargées : " + extremites);
 
         if (!cheminItem.isCarburantSuffisant()) {
             showError("Carburant insuffisant pour ce chemin!\n" +
-                     "Necessite: " + String.format("%.1f", cheminItem.getCarburantNecessaire()) + " L\n" +
-                     "Reservoir: " + String.format("%.1f", voiture.getReservoir()) + " L");
+                    "Necessite: " + String.format("%.1f", cheminItem.getCarburantNecessaire()) + " L\n" +
+                    "Reservoir: " + String.format("%.1f", voiture.getReservoir()) + " L");
             return;
         }
 
@@ -323,7 +431,7 @@ System.out.println("Extrémités chargées : " + extremites);
         panelChemin.setAfficherChemin(true);
         panelChemin.setVoyageActuel(voyageActuel);
         panelChemin.setCheminSelectionne(cheminItem);
-        
+
         demarrerAnimation();
     }
 
@@ -346,11 +454,11 @@ System.out.println("Extrémités chargées : " + extremites);
         if (animationTimer != null && animationTimer.isRunning()) {
             animationTimer.stop();
         }
-        
+
         voyageActuel = null;
         cheminsTrouves = null;
         dureeEstimee = 0;
-        
+
         btnDemarrer.setEnabled(true);
         btnArreter.setEnabled(false);
         cbDepart.setEnabled(true);
@@ -360,12 +468,12 @@ System.out.println("Extrémités chargées : " + extremites);
         txtHeureDepart.setEnabled(true);
         listChemins.setEnabled(true);
         btnRechercher.setEnabled(true);
-        
+
         txtHeureDepart.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
         mettreAJourVitesseMoyenne();
-        
+
         listModel.clear();
-        
+
         lblHeureActuelle.setText("Heure actuelle: --:--");
         lblHeureArrivee.setText("Arrivee estimee: --:--");
         lblTemps.setText("Temps ecoule: 0.00 h");
@@ -373,10 +481,11 @@ System.out.println("Extrémités chargées : " + extremites);
         lblVitesse.setText("Vitesse: 0.0 km/h");
         lblVitesse.setForeground(Color.BLACK);
         lblCarburant.setText("Carburant: 0.0 L");
-        
+        lblVitesseMoyenneReelle.setText("Vitesse moyenne réelle: -- km/h");
+    lblVitesseMoyenneReelle.setForeground(Color.BLACK);
         panelChemin.setAfficherChemin(false);
         panelChemin.repaint();
-        
+
         chargerDonnees();
 
         showInfo("Interface reinitialisee avec succes!");
@@ -409,18 +518,31 @@ System.out.println("Extrémités chargées : " + extremites);
                     txtHeureDepart.setEnabled(true);
                     listChemins.setEnabled(true);
                     btnRechercher.setEnabled(true);
-                    
+
                     double carburantUtilise = voyageActuel.getVoiture().calculerConsommation(
-                        voyageActuel.getDistanceTotale()
-                    );
-                    
-                    showInfo("Voyage termine!\n" +
-                            "Heure de depart: " + voyageActuel.getHeureDepartFormatee() + "\n" +
-                            "Heure d'arrivee: " + voyageActuel.getHeureActuelleFormatee() + "\n" +
-                            "Temps total: " + String.format("%.2f heures", voyageActuel.getTempsEcoule()) + "\n" +
-                            "Distance: " + String.format("%.1f km", voyageActuel.getDistanceTotale()) + "\n" +
-                            "Vitesse moyenne: " + String.format("%.1f km/h", voyageActuel.getVitesseMoyenne()) + "\n" +
-                            "Carburant utilise: " + String.format("%.1f L", carburantUtilise));
+                            voyageActuel.getDistanceTotale());
+                    double vitesseMoyenneReelle = voyageActuel.getVoiture()
+                            .calculerVitesseMoyenneReelle(voyageActuel);
+                    showInfo("🏁 Voyage terminé!\n" +
+                            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+                            "⏰ Heure de départ: " + voyageActuel.getHeureDepartFormatee() + "\n" +
+                            "⏰ Heure d'arrivée: " + voyageActuel.getHeureActuelleFormatee() + "\n" +
+                            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+                            "📏 Distance: " + String.format("%.1f km", voyageActuel.getDistanceTotale()) + "\n" +
+                            "⏱️  Temps total: " + String.format("%.2f heures (%.0f min)",
+                                    voyageActuel.getTempsEcoule(), voyageActuel.getTempsEcoule() * 60)
+                            + "\n" +
+                            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+                            "🎯 Vitesse souhaitée: " + String.format("%.1f km/h", voyageActuel.getVitesseMoyenne())
+                            + "\n" +
+                            "🚗 Vitesse moyenne RÉELLE: " + String.format("%.2f km/h", vitesseMoyenneReelle) + "\n" +
+                            "📉 Différence: " + String.format("%.2f km/h (%.1f%%)",
+                                    voyageActuel.getVitesseMoyenne() - vitesseMoyenneReelle,
+                                    ((voyageActuel.getVitesseMoyenne() - vitesseMoyenneReelle)
+                                            / voyageActuel.getVitesseMoyenne()) * 100)
+                            + "\n" +
+                            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
+                            "⛽ Carburant utilisé: " + String.format("%.1f L", carburantUtilise));
                 }
             }
         });
@@ -433,7 +555,7 @@ System.out.println("Extrémités chargées : " + extremites);
         lblTemps.setText(String.format("Temps ecoule: %.2f h", voyageActuel.getTempsEcoule()));
         lblPosition.setText(String.format("Position: %.1f / %.1f km",
                 voyageActuel.getPositionAbsolue(), voyageActuel.getDistanceTotale()));
-        
+
         if (voyageActuel.isEnPause() && voyageActuel.getPauseActuelle() != null) {
             lblVitesse.setText("PAUSE jusqu'a " + voyageActuel.getPauseActuelle().getHeureFinFormatee());
             lblVitesse.setForeground(Color.RED);
@@ -441,16 +563,17 @@ System.out.println("Extrémités chargées : " + extremites);
             lblVitesse.setText(String.format("Vitesse: %.1f km/h", voyageActuel.getVitesseEffective()));
             lblVitesse.setForeground(Color.BLACK);
         }
-        
+
         double carburantUtilise = voyageActuel.getVoiture().calculerConsommation(
-            voyageActuel.getPositionAbsolue()
-        );
+                voyageActuel.getPositionAbsolue());
         lblCarburant.setText(String.format("Carburant: %.1f L", carburantUtilise));
+        double vitesseReelle = voyageActuel.getVoiture().calculerVitesseMoyenneReelle(voyageActuel);
+        lblVitesseMoyenneReelle.setText(String.format("Vitesse moy. réelle: %.2f km/h", vitesseReelle));
     }
 
     private void ouvrirGestionLavaka() {
         CheminItem cheminSelectionne = listChemins.getSelectedValue();
-        
+
         LavakaController controller;
         if (cheminSelectionne != null) {
             // Passer les chemins du trajet sélectionné
@@ -459,27 +582,27 @@ System.out.println("Extrémités chargées : " + extremites);
             // Aucun chemin sélectionné, afficher tous les chemins
             controller = new LavakaController(this);
         }
-        
+
         controller.setVisible(true);
-        
+
         try {
             // Nettoyer et recharger
             for (Lalana l : lalanas) {
                 l.getLavakas().clear();
             }
-            
+
             LavakaDAO lavakaDAO = new LavakaDAO();
             lavakaDAO.chargerLavakasPourLalanas(lalanas);
-            
+
             for (Lalana l : lalanas) {
                 if (l.getPauses() != null) {
                     l.getPauses().clear();
                 }
             }
-            
+
             PauseDAO pauseDAO = new PauseDAO();
             pauseDAO.chargerPausesPourLalanas(lalanas);
-            
+
             if (voyageActuel != null) {
                 panelChemin.repaint();
             }
@@ -490,7 +613,7 @@ System.out.println("Extrémités chargées : " + extremites);
 
     private void ouvrirGestionPause() {
         CheminItem cheminSelectionne = listChemins.getSelectedValue();
-        
+
         PauseController controller;
         if (cheminSelectionne != null) {
             // Passer les chemins du trajet sélectionné
@@ -499,9 +622,9 @@ System.out.println("Extrémités chargées : " + extremites);
             // Aucun chemin sélectionné, afficher tous les chemins
             controller = new PauseController(this);
         }
-        
+
         controller.setVisible(true);
-        
+
         try {
             // Nettoyer et recharger
             for (Lalana l : lalanas) {
@@ -509,10 +632,10 @@ System.out.println("Extrémités chargées : " + extremites);
                     l.getPauses().clear();
                 }
             }
-            
+
             PauseDAO pauseDAO = new PauseDAO();
             pauseDAO.chargerPausesPourLalanas(lalanas);
-            
+
             if (voyageActuel != null) {
                 panelChemin.repaint();
             }
@@ -528,18 +651,18 @@ System.out.println("Extrémités chargées : " + extremites);
                 showError("Veuillez selectionner un chemin");
                 return;
             }
-            
+
             double position = Double.parseDouble(txtPositionPause.getText().trim());
-            LocalTime debut = LocalTime.parse(txtHeureDebutPause.getText().trim(), 
-                                             DateTimeFormatter.ofPattern("HH:mm"));
-            LocalTime fin = LocalTime.parse(txtHeureFinPause.getText().trim(), 
-                                           DateTimeFormatter.ofPattern("HH:mm"));
-            
+            LocalTime debut = LocalTime.parse(txtHeureDebutPause.getText().trim(),
+                    DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime fin = LocalTime.parse(txtHeureFinPause.getText().trim(),
+                    DateTimeFormatter.ofPattern("HH:mm"));
+
             if (position < 0) {
                 showError("La position doit etre positive");
                 return;
             }
-            
+
             Lalana lalana = null;
             for (Lalana l : lalanas) {
                 if (l.getNom().equals(chemin)) {
@@ -547,30 +670,30 @@ System.out.println("Extrémités chargées : " + extremites);
                     break;
                 }
             }
-            
+
             if (lalana != null && position > lalana.getDistance()) {
-                showError(String.format("La position depasse la longueur du chemin (%.1f km)", 
-                                       lalana.getDistance()));
+                showError(String.format("La position depasse la longueur du chemin (%.1f km)",
+                        lalana.getDistance()));
                 return;
             }
-            
+
             if (debut.isAfter(fin) || debut.equals(fin)) {
                 showError("L'heure de debut doit etre avant l'heure de fin");
                 return;
             }
-            
+
             Pause pause = new Pause(position, debut, fin);
             PauseDAO pauseDAO = new PauseDAO();
             pauseDAO.insert(pause, chemin);
-            
+
             pauseDAO.chargerPausesPourLalanas(lalanas);
-            
+
             showInfo("Pause ajoutee avec succes!");
-            
+
             txtPositionPause.setText("");
             txtHeureDebutPause.setText("10:00");
             txtHeureFinPause.setText("11:00");
-            
+
         } catch (NumberFormatException ex) {
             showError("Veuillez entrer une position valide");
         } catch (DateTimeParseException ex) {
@@ -603,9 +726,9 @@ System.out.println("Extrémités chargées : " + extremites);
     }
 
     public static void main(String[] args) throws SQLException {
-    
-           // Connection conn = DatabaseConnection.getOracleConnection();
-        //System.out.println("Connexion Oracle : " + conn.getMetaData().getUserName());
+
+        // Connection conn = DatabaseConnection.getOracleConnection();
+        // System.out.println("Connexion Oracle : " + conn.getMetaData().getUserName());
 
         SwingUtilities.invokeLater(() -> new MainApp());
     }
