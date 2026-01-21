@@ -1,5 +1,4 @@
 package src.java;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.Connection;
@@ -7,6 +6,7 @@ import java.sql.SQLException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -119,11 +119,13 @@ public class MainApp extends JFrame {
         mainPanel.add(PanelFactory.creerPanelGauche(
                 listModel, listChemins,
                 btnDemarrer, btnArreter,
-                lblHeureActuelle, lblHeureArrivee, lblTemps, lblPosition, lblVitesse, lblCarburant,
-                btnDetailsVitesse,lblVitesseMoyenneReelle,
+                lblHeureActuelle, lblHeureArrivee, lblTemps, lblPosition, lblVitesse, btnDetailsVitesse,
+                lblVitesseMoyenneReelle, lblCarburant,
+                
                 () -> {
                     panelChemin.setCheminSelectionne(listChemins.getSelectedValue());
                     panelChemin.repaint();
+                    afficherVitesseReelleCheminSelectionne();
                 }
 
         ), BorderLayout.WEST);
@@ -157,18 +159,12 @@ public class MainApp extends JFrame {
 
         try {
             double vitesseMoyenne = Double.parseDouble(txtVitesseMoyenne.getText().trim());
-            LocalTime heureDepart = LocalTime.parse(txtHeureDepart.getText().trim(),
-                    DateTimeFormatter.ofPattern("HH:mm"));
-
-            String depart = (String) cbDepart.getSelectedItem();
-            String arrivee = (String) cbArrivee.getSelectedItem();
-
-            // Créer un voyage temporaire pour le calcul
-            Voyage voyageTemp = new Voyage(depart, arrivee, voiture, vitesseMoyenne, heureDepart);
-            voyageTemp.setCheminChoisi(selected.getChemin());
-
+            
+            // Décomposer le chemin en segments
+            List<Segment> segments = decomposerChemin(selected.getChemin(), voiture, vitesseMoyenne);
+            
             // Calculer la vitesse réelle
-            double vitesseReelle = voiture.calculerVitesseMoyenneReelle(voyageTemp);
+            double vitesseReelle = voiture.calculerVitesseMoyenneReelle(segments, vitesseMoyenne);
 
             // Afficher
             lblVitesseMoyenneReelle.setText(
@@ -234,26 +230,45 @@ public class MainApp extends JFrame {
             return;
         }
 
-        LocalTime heureDepart;
-        try {
-            heureDepart = LocalTime.parse(txtHeureDepart.getText().trim(),
-                    DateTimeFormatter.ofPattern("HH:mm"));
-        } catch (DateTimeParseException e) {
-            heureDepart = LocalTime.now();
-        }
-
-        // Créer un voyage temporaire
-        String depart = (String) cbDepart.getSelectedItem();
-        String arrivee = (String) cbArrivee.getSelectedItem();
-
-        Voyage voyageTemp = new Voyage(depart, arrivee, voiture, vitesseMoyenne, heureDepart);
-        voyageTemp.setCheminChoisi(cheminItem.getChemin());
-
+        // Décomposer le chemin en segments
+        List<Segment> segments = decomposerChemin(cheminItem.getChemin(), voiture, vitesseMoyenne);
+        
         // Générer les détails
-        String details = voiture.afficherDetailsVitesseMoyenne(voyageTemp);
+        StringBuilder details = new StringBuilder();
+        details.append("╔═══════════════════════════════════════════════════════════╗\n");
+        details.append("║       DÉTAILS DE LA VITESSE MOYENNE RÉELLE               ║\n");
+        details.append("╚═══════════════════════════════════════════════════════════╝\n\n");
+        
+        details.append("🚗 Voiture: ").append(voiture.toString()).append("\n");
+        details.append("🎯 Vitesse souhaitée: ").append(String.format("%.1f km/h", vitesseMoyenne)).append("\n\n");
+        
+        details.append("═══════════════════════════════════════════════════════════\n");
+        details.append("                    SEGMENTS DU TRAJET                     \n");
+        details.append("═══════════════════════════════════════════════════════════\n\n");
+        
+        double distanceTotale = 0;
+        for (int i = 0; i < segments.size(); i++) {
+            Segment seg = segments.get(i);
+            distanceTotale += seg.getDistance();
+            details.append(String.format("Segment %d:\n", i + 1));
+            details.append(String.format("  📏 Distance: %.2f km\n", seg.getDistance()));
+            details.append(String.format("  ⚡ Vitesse: %.2f km/h\n", seg.getVitesse()));
+            details.append(String.format("  📊 Contribution: %.2f\n\n", seg.getContribution()));
+        }
+        
+        double vitesseReelle = voiture.calculerVitesseMoyenneReelle(segments, vitesseMoyenne);
+        
+        details.append("═══════════════════════════════════════════════════════════\n");
+        details.append("                        RÉSULTAT                          \n");
+        details.append("═══════════════════════════════════════════════════════════\n\n");
+        details.append(String.format("📏 Distance totale: %.2f km\n", distanceTotale));
+        details.append(String.format("🚗 Vitesse moyenne RÉELLE: %.2f km/h\n", vitesseReelle));
+        details.append(String.format("📉 Différence: %.2f km/h (%.1f%%)\n",
+                vitesseMoyenne - vitesseReelle,
+                ((vitesseMoyenne - vitesseReelle) / vitesseMoyenne) * 100));
 
         // Afficher dans une fenêtre
-        JTextArea textArea = new JTextArea(details);
+        JTextArea textArea = new JTextArea(details.toString());
         textArea.setEditable(false);
         textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
         textArea.setBackground(new Color(240, 240, 240));
@@ -450,6 +465,85 @@ public class MainApp extends JFrame {
         btnRechercher.setEnabled(true);
     }
 
+    /* ==========================================================
+                   DÉCOMPOSITION & CALCUL VITESSE
+       ========================================================== */
+
+    public static List<Segment> decomposerLalana(
+            Lalana lalana,
+            double vitesseSouhaitee,
+            double vitesseMaxVoiture) {
+
+        List<Segment> segments = new ArrayList<>();
+        double vitesseNormale = Math.min(vitesseSouhaitee, vitesseMaxVoiture);
+
+        List<Lavaka> lavakas = lalana.getLavakas();
+        double longueur = lalana.getDistance();
+
+        if (lavakas == null || lavakas.isEmpty()) {
+            segments.add(new Segment(longueur, vitesseNormale));
+            return segments;
+        }
+
+        lavakas.sort((a, b) -> Double.compare(a.getDebut(), b.getDebut()));
+        double position = 0;
+
+        for (Lavaka l : lavakas) {
+
+            if (position < l.getDebut()) {
+                segments.add(new Segment(
+                        l.getDebut() - position,
+                        vitesseNormale
+                ));
+            }
+
+            double vitesseLavaka = Math.max(
+                    10,
+                    vitesseNormale * (1 - l.getRalentissement())
+            );
+
+            segments.add(new Segment(
+                    l.getFin() - l.getDebut(),
+                    vitesseLavaka
+            ));
+
+            position = l.getFin();
+        }
+
+        if (position < longueur) {
+            segments.add(new Segment(
+                    longueur - position,
+                    vitesseNormale
+            ));
+        }
+
+        return segments;
+    }
+
+    private List<Segment> decomposerChemin(
+            List<Lalana> chemin,
+            Voiture voiture,
+            double vitesseSouhaitee) {
+
+        List<Segment> segments = new ArrayList<>();
+
+        for (Lalana l : chemin) {
+            segments.addAll(
+                    decomposerLalana(
+                            l,
+                            vitesseSouhaitee,
+                            voiture.getVitesseMaximale()
+                    )
+            );
+        }
+        return segments;
+    }
+
+    /* ==========================================================
+                     CALCUL & AFFICHAGE
+       ========================================================== */
+
+
     private void reinitialiser() {
         if (animationTimer != null && animationTimer.isRunning()) {
             animationTimer.stop();
@@ -482,7 +576,8 @@ public class MainApp extends JFrame {
         lblVitesse.setForeground(Color.BLACK);
         lblCarburant.setText("Carburant: 0.0 L");
         lblVitesseMoyenneReelle.setText("Vitesse moyenne réelle: -- km/h");
-    lblVitesseMoyenneReelle.setForeground(Color.BLACK);
+        lblVitesseMoyenneReelle.setForeground(Color.BLACK);
+        
         panelChemin.setAfficherChemin(false);
         panelChemin.repaint();
 
@@ -521,8 +616,16 @@ public class MainApp extends JFrame {
 
                     double carburantUtilise = voyageActuel.getVoiture().calculerConsommation(
                             voyageActuel.getDistanceTotale());
+                    
+                    // Calculer la vitesse moyenne réelle
+                    List<Segment> segments = decomposerChemin(
+                        voyageActuel.getCheminChoisi(),
+                        voyageActuel.getVoiture(),
+                        voyageActuel.getVitesseMoyenne()
+                    );
                     double vitesseMoyenneReelle = voyageActuel.getVoiture()
-                            .calculerVitesseMoyenneReelle(voyageActuel);
+                            .calculerVitesseMoyenneReelle(segments, voyageActuel.getVitesseMoyenne());
+                    
                     showInfo("🏁 Voyage terminé!\n" +
                             "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n" +
                             "⏰ Heure de départ: " + voyageActuel.getHeureDepartFormatee() + "\n" +
@@ -567,7 +670,14 @@ public class MainApp extends JFrame {
         double carburantUtilise = voyageActuel.getVoiture().calculerConsommation(
                 voyageActuel.getPositionAbsolue());
         lblCarburant.setText(String.format("Carburant: %.1f L", carburantUtilise));
-        double vitesseReelle = voyageActuel.getVoiture().calculerVitesseMoyenneReelle(voyageActuel);
+        
+        // Calculer la vitesse réelle pour l'affichage en temps réel
+        List<Segment> segments = decomposerChemin(
+            voyageActuel.getCheminChoisi(),
+            voyageActuel.getVoiture(),
+            voyageActuel.getVitesseMoyenne()
+        );
+        double vitesseReelle = voyageActuel.getVoiture().calculerVitesseMoyenneReelle(segments, voyageActuel.getVitesseMoyenne());
         lblVitesseMoyenneReelle.setText(String.format("Vitesse moy. réelle: %.2f km/h", vitesseReelle));
     }
 
@@ -576,17 +686,14 @@ public class MainApp extends JFrame {
 
         LavakaController controller;
         if (cheminSelectionne != null) {
-            // Passer les chemins du trajet sélectionné
             controller = new LavakaController(this, cheminSelectionne.getChemin());
         } else {
-            // Aucun chemin sélectionné, afficher tous les chemins
             controller = new LavakaController(this);
         }
 
         controller.setVisible(true);
 
         try {
-            // Nettoyer et recharger
             for (Lalana l : lalanas) {
                 l.getLavakas().clear();
             }
@@ -616,17 +723,14 @@ public class MainApp extends JFrame {
 
         PauseController controller;
         if (cheminSelectionne != null) {
-            // Passer les chemins du trajet sélectionné
             controller = new PauseController(this, cheminSelectionne.getChemin());
         } else {
-            // Aucun chemin sélectionné, afficher tous les chemins
             controller = new PauseController(this);
         }
 
         controller.setVisible(true);
 
         try {
-            // Nettoyer et recharger
             for (Lalana l : lalanas) {
                 if (l.getPauses() != null) {
                     l.getPauses().clear();
@@ -726,10 +830,6 @@ public class MainApp extends JFrame {
     }
 
     public static void main(String[] args) throws SQLException {
-
-        // Connection conn = DatabaseConnection.getOracleConnection();
-        // System.out.println("Connexion Oracle : " + conn.getMetaData().getUserName());
-
         SwingUtilities.invokeLater(() -> new MainApp());
     }
 }

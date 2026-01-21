@@ -7,13 +7,31 @@ public class Voiture {
 
     private String nom;
     private String type;
-    private double vitesseMaximale;  // Changé de vitesseMoyenne à vitesseMaximale
-    private double longueur;        
+    private double vitesseMaximale;
+    private double longueur;
     private double largeur;
     private double reservoir;
     private double consommation;
-
-    public Voiture(String nom, String type, double vitesseMaximale, double longueur, double largeur, 
+public double getConsommation() {
+    return consommation;
+}
+public void setConsommation(double consommation) {
+    this.consommation = consommation;
+}
+public double getLargeur() {
+    return largeur;
+}
+public void setLargeur(double largeur) {
+    this.largeur = largeur;
+}
+public double getLongueur() {
+    return longueur;
+}
+public void setLongueur(double longueur) {
+    this.longueur = longueur;
+}
+    public Voiture(String nom, String type, double vitesseMaximale,
+                   double longueur, double largeur,
                    double reservoir, double consommation) {
         this.nom = nom;
         this.type = type;
@@ -32,241 +50,175 @@ public class Voiture {
         return calculerConsommation(distance) <= reservoir;
     }
 
-    public String getNom() {
-        return nom;
-    }
+    // ✅ MÉTHODE OFFICIELLE DEMANDÉE
+   /*  public double calculerVitesseMoyenneReelle(
+            List<Segment> segments,
+            double vitesseSouhaitee) {
 
-    public String getType() {
-        return type;
-    }
+        if (segments == null || segments.isEmpty()) return 0;
 
-    public double getVitesseMaximale() {  // Changé de getVitesseMoyenne
+        double somme = 0;
+        double distanceTotale = 0;
+
+        for (Segment s : segments) {
+            somme += s.getContribution();
+            distanceTotale += s.getDistance();
+        }
+
+        return distanceTotale == 0 ? 0 : somme / distanceTotale;
+    }
+   */
+   
+    public double getVitesseMaximale() {
         return vitesseMaximale;
-    }
-
-    public double getLongueur() {
-        return longueur;
-    }
-
-    public double getLargeur() {
-        return largeur;
     }
 
     public double getReservoir() {
         return reservoir;
     }
 
-    public double getConsommation() {
-        return consommation;
-    }
-
     @Override
     public String toString() {
-        return nom + " (" + type + ") - Max: " + vitesseMaximale + " km/h";
+        return nom + " (" + type + ")";
     }
 
-
-
-public double calculerVitesseMoyenneReelle(Voyage voyage) {
-    if (voyage == null || voyage.getCheminChoisi().isEmpty()) {
-        return 0.0;
+    public String getNom() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getNom'");
     }
-    
-    double distanceTotale = 0.0;
-    double tempsTotalHeures = 0.0;
-    double vitesseMoyenneSouhaitee = voyage.getVitesseMoyenne();
-    
-    // Pour chaque route du chemin
-    for (Lalana lalana : voyage.getCheminChoisi()) {
-        double distanceLalana = lalana.getDistance();
-        List<Lavaka> lavakas = lalana.getLavakas();
+
+    public String getType() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getType'");
+    }
+
+    public double calculerVitesseMoyenneReelle(
+            List<Segment> segments,
+            double vitesseSouhaitee) {
         
-        if (lavakas == null || lavakas.isEmpty()) {
-            // Pas de lavaka : toute la route à vitesse normale
-            double temps = distanceLalana / vitesseMoyenneSouhaitee;
-            distanceTotale += distanceLalana;
-            tempsTotalHeures += temps;
-        } else {
-            // Il y a des lavakas : décomposer la route
-            // Trier les lavakas par position
-            List<Lavaka> lavakasTries = new ArrayList<>(lavakas);
-            lavakasTries.sort((l1, l2) -> Double.compare(l1.getDebut(), l2.getDebut()));
-            
-            double positionCourante = 0;
-            
-            for (Lavaka lavaka : lavakasTries) {
-                double debutLavaka = lavaka.getDebut();
-                double finLavaka = lavaka.getFin();
-                
-                // Partie AVANT le lavaka (route normale)
-                if (positionCourante < debutLavaka) {
-                    double distanceNormale = debutLavaka - positionCourante;
-                    double tempsNormal = distanceNormale / vitesseMoyenneSouhaitee;
-                    
-                    distanceTotale += distanceNormale;
-                    tempsTotalHeures += tempsNormal;
-                }
-                
-                // Partie AVEC lavaka (vitesse réduite)
-                double distanceLavaka = finLavaka - debutLavaka;
-                double vitesseReduite = calculerVitesseDansLavaka(vitesseMoyenneSouhaitee, lavaka);
-                double tempsLavaka = distanceLavaka / vitesseReduite;
-                
-                distanceTotale += distanceLavaka;
-                tempsTotalHeures += tempsLavaka;
-                
-                positionCourante = finLavaka;
-            }
-            
-            // Partie APRÈS le dernier lavaka
-            if (positionCourante < distanceLalana) {
-                double distanceFinale = distanceLalana - positionCourante;
-                double tempsFinale = distanceFinale / vitesseMoyenneSouhaitee;
-                
-                distanceTotale += distanceFinale;
-                tempsTotalHeures += tempsFinale;
-            }
+        if (segments == null || segments.isEmpty()) {
+            return 0;
         }
+
+        double distanceTotale = 0;
+        double tempsTotalHeures = 0;
+
+        for (Segment s : segments) {
+            double distance = s.getDistance();
+            double vitesse = s.getVitesse();
+            
+            if (vitesse <= 0) {
+                continue; // Éviter division par zéro
+            }
+            
+            distanceTotale += distance;
+            tempsTotalHeures += distance / vitesse; // Temps = Distance / Vitesse
+        }
+
+        // Vitesse moyenne = Distance totale / Temps total
+        return tempsTotalHeures == 0 ? 0 : distanceTotale / tempsTotalHeures;
     }
-    
-    // Vitesse moyenne réelle = Distance totale / Temps total
-    if (tempsTotalHeures == 0) {
-        return 0.0;
-    }
-    
-    return distanceTotale / tempsTotalHeures;
-}
 
+    /**
+     * Décompose une lalana en segments en tenant compte des lavakas
+     */
+    private List<Segment> decomposerLalana(Lalana lalana, double vitesseSouhaitee) {
+        List<Segment> segments = new ArrayList<>();
+        double vitesseNormale = Math.min(vitesseSouhaitee, this.vitesseMaximale);
 
-private double calculerVitesseDansLavaka(double vitesseNormale, Lavaka lavaka) {
-    double facteurReduction = 1 - lavaka.getRalentissement();
-    double vitesseReduite = vitesseNormale * facteurReduction;
-    
-    double vitesseMinimale = 10.0;
-    
-    return Math.max(vitesseReduite, vitesseMinimale);
-}
-
-public String afficherDetailsVitesseMoyenne(Voyage voyage) {
-    StringBuilder details = new StringBuilder();
-    double distanceTotale = 0.0;
-    double tempsTotalHeures = 0.0;
-    double vitesseMoyenneSouhaitee = voyage.getVitesseMoyenne();
-    
-    details.append("╔═══════════════════════════════════════════════════════╗\n");
-    details.append("║     CALCUL DE LA VITESSE MOYENNE RÉELLE               ║\n");
-    details.append("╚═══════════════════════════════════════════════════════╝\n\n");
-    
-    details.append(String.format("Trajet: %s → %s\n", voyage.getDepart(), voyage.getArrivee()));
-    details.append(String.format("Voiture: %s\n", this.nom));
-    details.append(String.format("Vitesse souhaitée: %.1f km/h\n", vitesseMoyenneSouhaitee));
-    details.append(String.format("Vitesse maximale: %.1f km/h\n\n", this.vitesseMaximale));
-    
-    int numRoute = 1;
-    for (Lalana lalana : voyage.getCheminChoisi()) {
-        details.append(String.format("─── Route %d: %s (%.1f km) ───\n", 
-            numRoute, lalana.getNom(), lalana.getDistance()));
-        
-        double distanceLalana = lalana.getDistance();
         List<Lavaka> lavakas = lalana.getLavakas();
-        
+        double longueur = lalana.getDistance();
+
         if (lavakas == null || lavakas.isEmpty()) {
-            // Pas de lavaka
-            double temps = distanceLalana / vitesseMoyenneSouhaitee;
+            segments.add(new Segment(longueur, vitesseNormale));
+            return segments;
+        }
+
+        lavakas.sort((a, b) -> Double.compare(a.getDebut(), b.getDebut()));
+        double position = 0;
+
+        for (Lavaka l : lavakas) {
+            if (position < l.getDebut()) {
+                segments.add(new Segment(l.getDebut() - position, vitesseNormale));
+            }
+
+            double vitesseLavaka = Math.max(10, vitesseNormale * (1 - l.getRalentissement()));
+            segments.add(new Segment(l.getFin() - l.getDebut(), vitesseLavaka));
+
+            position = l.getFin();
+        }
+
+        if (position < longueur) {
+            segments.add(new Segment(longueur - position, vitesseNormale));
+        }
+
+        return segments;
+    }
+
+    /**
+     * Décompose un chemin complet en segments
+     */
+    private List<Segment> decomposerChemin(List<Lalana> chemin, double vitesseSouhaitee) {
+        List<Segment> segments = new ArrayList<>();
+        for (Lalana l : chemin) {
+            segments.addAll(decomposerLalana(l, vitesseSouhaitee));
+        }
+        return segments;
+    }
+
+    /**
+     * Génère un rapport détaillé du calcul de vitesse moyenne
+     */
+    public String afficherDetailsVitesseMoyenne(Voyage voyage) {
+        if (voyage == null || voyage.getCheminChoisi() == null) {
+            return "Aucun voyage défini";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("╔═══════════════════════════════════════════════════════════╗\n");
+        sb.append("║       DÉTAILS DE LA VITESSE MOYENNE RÉELLE               ║\n");
+        sb.append("╚═══════════════════════════════════════════════════════════╝\n\n");
+        
+        sb.append("🚗 Voiture: ").append(this.toString()).append("\n");
+        sb.append("🎯 Vitesse souhaitée: ").append(String.format("%.1f km/h", voyage.getVitesseMoyenne())).append("\n\n");
+        
+        sb.append("═══════════════════════════════════════════════════════════\n");
+        sb.append("                    SEGMENTS DU TRAJET                     \n");
+        sb.append("═══════════════════════════════════════════════════════════\n\n");
+        
+        // Décomposer le chemin
+        List<Segment> segments = decomposerChemin(voyage.getCheminChoisi(), voyage.getVitesseMoyenne());
+        
+        double distanceTotale = 0;
+        double tempsTotalHeures = 0;
+        int segmentNum = 1;
+        
+        for (Segment seg : segments) {
+            double distance = seg.getDistance();
+            double vitesse = seg.getVitesse();
+            double temps = vitesse > 0 ? distance / vitesse : 0;
             
-            details.append("  Segment NORMAL:\n");
-            details.append(String.format("    • Distance: %.2f km\n", distanceLalana));
-            details.append(String.format("    • Vitesse: %.2f km/h\n", vitesseMoyenneSouhaitee));
-            details.append(String.format("    • Temps: %.2f h (%.0f min)\n\n", temps, temps * 60));
-            
-            distanceTotale += distanceLalana;
+            distanceTotale += distance;
             tempsTotalHeures += temps;
-        } else {
-            // Avec lavakas
-            List<Lavaka> lavakasTries = new ArrayList<>(lavakas);
-            lavakasTries.sort((l1, l2) -> Double.compare(l1.getDebut(), l2.getDebut()));
             
-            double positionCourante = 0;
-            int numSegment = 1;
-            
-            for (Lavaka lavaka : lavakasTries) {
-                double debutLavaka = lavaka.getDebut();
-                double finLavaka = lavaka.getFin();
-                
-                // Segment normal avant le lavaka
-                if (positionCourante < debutLavaka) {
-                    double distanceNormale = debutLavaka - positionCourante;
-                    double tempsNormal = distanceNormale / vitesseMoyenneSouhaitee;
-                    
-                    details.append(String.format("  Segment %d [NORMAL]:\n", numSegment));
-                    details.append(String.format("    • Position: %.1f → %.1f km\n", 
-                        positionCourante, debutLavaka));
-                    details.append(String.format("    • Distance: %.2f km\n", distanceNormale));
-                    details.append(String.format("    • Vitesse: %.2f km/h\n", vitesseMoyenneSouhaitee));
-                    details.append(String.format("    • Temps: %.2f h (%.0f min)\n\n", 
-                        tempsNormal, tempsNormal * 60));
-                    
-                    distanceTotale += distanceNormale;
-                    tempsTotalHeures += tempsNormal;
-                    numSegment++;
-                }
-                
-                // Segment avec lavaka
-                double distanceLavaka = finLavaka - debutLavaka;
-                double vitesseReduite = calculerVitesseDansLavaka(vitesseMoyenneSouhaitee, lavaka);
-                double tempsLavaka = distanceLavaka / vitesseReduite;
-                
-                details.append(String.format("  Segment %d [LAVAKA - Ralentissement: %.0f%%]:\n", 
-                    numSegment, lavaka.getRalentissement() * 100));
-                details.append(String.format("    • Position: %.1f → %.1f km\n", 
-                    debutLavaka, finLavaka));
-                details.append(String.format("    • Distance: %.2f km\n", distanceLavaka));
-                details.append(String.format("    • Vitesse: %.2f km/h\n", vitesseReduite));
-                details.append(String.format("    • Temps: %.2f h (%.0f min)\n\n", 
-                    tempsLavaka, tempsLavaka * 60));
-                
-                distanceTotale += distanceLavaka;
-                tempsTotalHeures += tempsLavaka;
-                
-                positionCourante = finLavaka;
-                numSegment++;
-            }
-            
-            // Segment final après le dernier lavaka
-            if (positionCourante < distanceLalana) {
-                double distanceFinale = distanceLalana - positionCourante;
-                double tempsFinale = distanceFinale / vitesseMoyenneSouhaitee;
-                
-                details.append(String.format("  Segment %d [NORMAL]:\n", numSegment));
-                details.append(String.format("    • Position: %.1f → %.1f km\n", 
-                    positionCourante, distanceLalana));
-                details.append(String.format("    • Distance: %.2f km\n", distanceFinale));
-                details.append(String.format("    • Vitesse: %.2f km/h\n", vitesseMoyenneSouhaitee));
-                details.append(String.format("    • Temps: %.2f h (%.0f min)\n\n", 
-                    tempsFinale, tempsFinale * 60));
-                
-                distanceTotale += distanceFinale;
-                tempsTotalHeures += tempsFinale;
-            }
+            sb.append(String.format("Segment %d:\n", segmentNum++));
+            sb.append(String.format("  📏 Distance: %.2f km\n", distance));
+            sb.append(String.format("  ⚡ Vitesse: %.2f km/h\n", vitesse));
+            sb.append(String.format("  ⏱️  Temps: %.4f h (%.1f min)\n\n", temps, temps * 60));
         }
         
-        numRoute++;
-        details.append("\n");
+        double vitesseReelle = tempsTotalHeures > 0 ? distanceTotale / tempsTotalHeures : 0;
+        
+        sb.append("═══════════════════════════════════════════════════════════\n");
+        sb.append("                        RÉSULTAT                          \n");
+        sb.append("═══════════════════════════════════════════════════════════\n\n");
+        sb.append(String.format("📏 Distance totale: %.2f km\n", distanceTotale));
+        sb.append(String.format("⏱️  Temps total: %.4f h (%.1f min)\n", tempsTotalHeures, tempsTotalHeures * 60));
+        sb.append(String.format("🚗 Vitesse moyenne RÉELLE: %.2f km/h\n", vitesseReelle));
+        sb.append(String.format("📉 Différence: %.2f km/h (%.1f%%)\n",
+                voyage.getVitesseMoyenne() - vitesseReelle,
+                ((voyage.getVitesseMoyenne() - vitesseReelle) / voyage.getVitesseMoyenne()) * 100));
+        
+        return sb.toString();
     }
-    
-    double vitesseMoyenneReelle = distanceTotale / tempsTotalHeures;
-    
-    details.append("╔═══════════════════════════════════════════════════════╗\n");
-    details.append("║                      RÉSUMÉ                           ║\n");
-    details.append("╚═══════════════════════════════════════════════════════╝\n");
-    details.append(String.format("Distance totale: %.2f km\n", distanceTotale));
-    details.append(String.format("Temps total: %.2f heures (%.0f minutes)\n", 
-        tempsTotalHeures, tempsTotalHeures * 60));
-    details.append(String.format("VITESSE MOYENNE RÉELLE: %.2f km/h\n", vitesseMoyenneReelle));
-    details.append(String.format("Différence avec vitesse souhaitée: %.2f km/h (%.1f%%)\n",
-        vitesseMoyenneSouhaitee - vitesseMoyenneReelle,
-        ((vitesseMoyenneSouhaitee - vitesseMoyenneReelle) / vitesseMoyenneSouhaitee) * 100));
-    
-    return details.toString();
-}
 }

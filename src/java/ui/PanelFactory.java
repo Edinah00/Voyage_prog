@@ -98,9 +98,8 @@ public class PanelFactory {
         JLabel lblTemps,
         JLabel lblPosition,
         JLabel lblVitesse,
-        JLabel lblVitesseMoyenneReelle,
-         JButton btnDetailsVitesse,
-
+        JButton btnDetailsVitesse,
+         JLabel lblVitesseMoyenneReelle,
         JLabel lblCarburant,
         Runnable onCheminRepaint
     ) {
@@ -119,6 +118,7 @@ public class PanelFactory {
         listChemins.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && listChemins.getSelectedValue() != null) {
                 onCheminRepaint.run();
+                
             }
         });
 
@@ -129,6 +129,7 @@ public class PanelFactory {
         JPanel panelBoutons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         panelBoutons.setBackground(new Color(245, 245, 245));
         panelBoutons.setMaximumSize(new Dimension(280, 40));
+
 
         btnDemarrer.setPreferredSize(new Dimension(130, 30));
         btnDemarrer.setBackground(new Color(33, 150, 243));
