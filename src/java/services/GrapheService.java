@@ -14,7 +14,7 @@ public class GrapheService {
         this.graphe = new HashMap<>();
     }
 
-   public void construireGraphe(List<Lalana> lalanas) {
+    public void construireGraphe(List<Lalana> lalanas) {
         System.out.println("Construction du graphe avec " + lalanas.size() + " lalanas");
         
         graphe.clear();
@@ -23,12 +23,19 @@ public class GrapheService {
             String extremiteGauche = lalana.getExtremiteGauche();
             String extremiteDroite = lalana.getExtremiteDroite();
             
-            // Ajouter uniquement la route dans le sens défini
+            // Ajouter la route dans le sens gauche → droite
             if (!graphe.containsKey(extremiteGauche)) {
                 graphe.put(extremiteGauche, new ArrayList<>());
             }
             graphe.get(extremiteGauche).add(lalana);
             System.out.println("Ajout de " + lalana.getNom() + " depuis " + extremiteGauche + " vers " + extremiteDroite);
+            
+            // NOUVEAU : Ajouter la route dans le sens inverse droite → gauche
+            if (!graphe.containsKey(extremiteDroite)) {
+                graphe.put(extremiteDroite, new ArrayList<>());
+            }
+            graphe.get(extremiteDroite).add(lalana);
+            System.out.println("Ajout de " + lalana.getNom() + " depuis " + extremiteDroite + " vers " + extremiteGauche + " (inverse)");
         }
         
         System.out.println("\nRecapitulatif du graphe:");
@@ -62,10 +69,10 @@ public class GrapheService {
     }
 
     private void trouverCheminsRecursif(String extremiteActuelle, String destination, 
-                                        List<Lalana> cheminActuel, 
-                                        List<String> extremitesVisitees,
-                                        List<List<Lalana>> tousLesChemins) {
-        
+                                    List<Lalana> cheminActuel, 
+                                    List<String> extremitesVisitees,
+                                    List<List<Lalana>> tousLesChemins) {
+    
         extremitesVisitees.add(extremiteActuelle);
         
         System.out.println("Visite de " + extremiteActuelle + " (profondeur: " + extremitesVisitees.size() + ")");
@@ -89,7 +96,16 @@ public class GrapheService {
         System.out.println("  " + sortants.size() + " chemins sortants depuis " + extremiteActuelle);
         
         for (Lalana lalana : sortants) {
-            String extremiteSuivante = lalana.getExtremiteDroite();
+            // MODIFIÉ : Déterminer l'extrémité suivante selon le sens
+            String extremiteSuivante;
+            if (lalana.getExtremiteGauche().equals(extremiteActuelle)) {
+                // On emprunte dans le sens normal (gauche → droite)
+                extremiteSuivante = lalana.getExtremiteDroite();
+            } else {
+                // On emprunte dans le sens inverse (droite → gauche)
+                extremiteSuivante = lalana.getExtremiteGauche();
+            }
+            
             System.out.println("    Examine chemin vers " + extremiteSuivante);
             
             if (!extremitesVisitees.contains(extremiteSuivante)) {

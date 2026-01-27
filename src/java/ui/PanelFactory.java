@@ -9,197 +9,191 @@ import src.java.models.Voiture;
 public class PanelFactory {
 
     public static JPanel creerPanelHaut(
-        JComboBox<String> cbDepart,
-        JComboBox<String> cbArrivee,
-        JComboBox<Voiture> cbVoiture,
-        JTextField txtVitesseMoyenne,
-        JTextField txtHeureDepart,
-        JButton btnRechercher,
-        JButton btnGererLavaka,
-        JButton btnGererPause,
-        JButton btnReinitialiser,  
-        Runnable onVoitureChange,
+            JComboBox<String> cbDepart,
+            JComboBox<String> cbArrivee,
+            JComboBox<Voiture> cbVoiture,
+            JTextField txtVitesseMoyenne,
+            JTextField txtHeureDepart,
+            JButton btnRechercher,
+            JButton btnGererLavaka,
+            JButton btnGererPause,
+            JButton btnGererReparation,
+            JButton btnGererSimba,
+            JButton btnCalculerCout,
+            JButton btnReinitialiser,
+            Runnable onVoitureChanged,
+            Runnable onReinitialiser) {
 
-        Runnable onReinitialiser   
-    ) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(new Color(224, 224, 224));
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        JPanel mainPanel = new JPanel(new GridLayout(1, 2, 15, 0));
+        mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        JLabel titre = new JLabel("Simulation de Voyage");
-        titre.setFont(new Font("Arial", Font.BOLD, 24));
-        titre.setAlignmentX(Component.LEFT_ALIGNMENT);
+        // BLOC GAUCHE - Configuration du voyage
+        JPanel blocGauche = new JPanel(new GridBagLayout());
+        blocGauche.setBorder(BorderFactory.createTitledBorder("Configuration du Voyage"));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JPanel selectionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 5));
-        selectionPanel.setBackground(new Color(224, 224, 224));
+        // Depart
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
+        blocGauche.add(new JLabel("Depart:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
+        blocGauche.add(cbDepart, gbc);
 
-        selectionPanel.add(new JLabel("Depart:"));
-        cbDepart.setPreferredSize(new Dimension(80, 25));
-        selectionPanel.add(cbDepart);
+        // Arrivee
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0;
+        blocGauche.add(new JLabel("Arrivee:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
+        blocGauche.add(cbArrivee, gbc);
 
-        selectionPanel.add(new JLabel("Arrivee:"));
-        cbArrivee.setPreferredSize(new Dimension(80, 25));
-        selectionPanel.add(cbArrivee);
+        // Voiture
+        gbc.gridx = 0; gbc.gridy = 2; gbc.weightx = 0;
+        blocGauche.add(new JLabel("Voiture:"), gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
+        cbVoiture.addActionListener(e -> onVoitureChanged.run());
+        blocGauche.add(cbVoiture, gbc);
 
-        selectionPanel.add(new JLabel("Voiture:"));
-        cbVoiture.setPreferredSize(new Dimension(200, 25));
-        cbVoiture.addActionListener(e -> onVoitureChange.run());
-        selectionPanel.add(cbVoiture);
+        // Vitesse moyenne
+        gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0;
+        blocGauche.add(new JLabel("Vitesse moy. (km/h):"), gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
+        blocGauche.add(txtVitesseMoyenne, gbc);
 
-        selectionPanel.add(new JLabel("Vitesse moy. (km/h):"));
-        txtVitesseMoyenne.setPreferredSize(new Dimension(60, 25));
-        selectionPanel.add(txtVitesseMoyenne);
+        // Heure depart
+        gbc.gridx = 0; gbc.gridy = 4; gbc.weightx = 0;
+        blocGauche.add(new JLabel("Heure depart (HH:mm):"), gbc);
+        gbc.gridx = 1; gbc.weightx = 1.0;
+        blocGauche.add(txtHeureDepart, gbc);
 
-        selectionPanel.add(new JLabel("Heure depart:"));
-        txtHeureDepart.setPreferredSize(new Dimension(60, 25));
-        txtHeureDepart.setToolTipText("Format: HH:mm (ex: 08:30)");
-        selectionPanel.add(txtHeureDepart);
-
-        btnRechercher.setBackground(new Color(120, 120, 120));
+        // Boutons Rechercher et Reinitialiser
+        JPanel btnPanelGauche = new JPanel(new GridLayout(1, 2, 5, 0));
+        btnRechercher.setBackground(new Color(33, 150, 243));
         btnRechercher.setForeground(Color.WHITE);
-        btnRechercher.setFont(new Font("Arial", Font.BOLD, 12));
         btnRechercher.setFocusPainted(false);
-        selectionPanel.add(btnRechercher);
-
-        btnGererLavaka.setBackground(new Color(120, 120, 120));
-        btnGererLavaka.setForeground(Color.WHITE);
-        btnGererLavaka.setFont(new Font("Arial", Font.BOLD, 12));
-        btnGererLavaka.setFocusPainted(false);
-        selectionPanel.add(btnGererLavaka);
-
-        btnGererPause.setBackground(new Color(120, 120, 120));
-        btnGererPause.setForeground(Color.WHITE);
-        btnGererPause.setFont(new Font("Arial", Font.BOLD, 12));
-        btnGererPause.setFocusPainted(false);
-        selectionPanel.add(btnGererPause);
-
-        btnReinitialiser.setBackground(new Color(120, 120, 120));
+        btnPanelGauche.add(btnRechercher);
+        
+        btnReinitialiser.setBackground(new Color(156, 39, 176));
         btnReinitialiser.setForeground(Color.WHITE);
-        btnReinitialiser.setFont(new Font("Arial", Font.BOLD, 12));
         btnReinitialiser.setFocusPainted(false);
-        btnReinitialiser.addActionListener(e -> onReinitialiser.run());  
-        selectionPanel.add(btnReinitialiser);
+        btnPanelGauche.add(btnReinitialiser);
+        
+        gbc.gridx = 0; gbc.gridy = 5; gbc.gridwidth = 2;
+        blocGauche.add(btnPanelGauche, gbc);
 
-        panel.add(titre);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(selectionPanel);
+        // BLOC DROIT - Gestion des données
+        JPanel blocDroit = new JPanel(new GridBagLayout());
+        blocDroit.setBorder(BorderFactory.createTitledBorder("Gestion des Donnees"));
+        GridBagConstraints gbc2 = new GridBagConstraints();
+        gbc2.insets = new Insets(5, 5, 5, 5);
+        gbc2.fill = GridBagConstraints.HORIZONTAL;
+        gbc2.weightx = 1.0;
 
-        return panel;
+        // Style des boutons
+        btnGererLavaka.setBackground(new Color(255, 152, 0));
+        btnGererLavaka.setForeground(Color.WHITE);
+        btnGererLavaka.setFocusPainted(false);
+        
+        btnGererPause.setBackground(new Color(103, 58, 183));
+        btnGererPause.setForeground(Color.WHITE);
+        btnGererPause.setFocusPainted(false);
+        
+        btnGererReparation.setBackground(new Color(0, 150, 136));
+        btnGererReparation.setForeground(Color.WHITE);
+        btnGererReparation.setFocusPainted(false);
+        
+        btnGererSimba.setBackground(new Color(233, 30, 99));
+        btnGererSimba.setForeground(Color.WHITE);
+        btnGererSimba.setFocusPainted(false);
+        
+        btnCalculerCout.setBackground(new Color(76, 175, 80));
+        btnCalculerCout.setForeground(Color.WHITE);
+        btnCalculerCout.setFocusPainted(false);
+
+        // Ajout des boutons
+        gbc2.gridx = 0; gbc2.gridy = 0;
+        blocDroit.add(btnGererLavaka, gbc2);
+
+        gbc2.gridy = 1;
+        blocDroit.add(btnGererPause, gbc2);
+
+        gbc2.gridy = 2;
+        blocDroit.add(btnGererReparation, gbc2);
+
+        gbc2.gridy = 3;
+        blocDroit.add(btnGererSimba, gbc2);
+
+        gbc2.gridy = 4;
+        blocDroit.add(btnCalculerCout, gbc2);
+
+        // Ajouter un espace vide pour aligner avec le bloc gauche
+        gbc2.gridy = 5;
+        gbc2.weighty = 1.0;
+        gbc2.fill = GridBagConstraints.BOTH;
+        blocDroit.add(new JPanel(), gbc2);
+
+        // Ajout des deux blocs au panneau principal
+        mainPanel.add(blocGauche);
+        mainPanel.add(blocDroit);
+
+        return mainPanel;
     }
 
     public static JPanel creerPanelGauche(
-        DefaultListModel<CheminItem> listModel,
-        JList<CheminItem> listChemins,
-        JButton btnDemarrer,
-        JButton btnArreter,
-        JLabel lblHeureActuelle,
-        JLabel lblHeureArrivee,
-        JLabel lblTemps,
-        JLabel lblPosition,
-        JLabel lblVitesse,
-        JButton btnDetailsVitesse,
-         JLabel lblVitesseMoyenneReelle,
-        JLabel lblCarburant,
-        Runnable onCheminRepaint
-    ) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setPreferredSize(new Dimension(300, 0));
-        panel.setBackground(new Color(245, 245, 245));
-        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+            DefaultListModel<CheminItem> listModel,
+            JList<CheminItem> listChemins,
+            JButton btnDemarrer,
+            JButton btnArreter,
+            JLabel lblHeureActuelle,
+            JLabel lblHeureArrivee,
+            JLabel lblTemps,
+            JLabel lblPosition,
+            JLabel lblVitesse,
+            JLabel lblCarburant,
+            Runnable onSelectionChanged) {
 
-        JLabel lblChemins = new JLabel("Chemins disponibles:");
-        lblChemins.setFont(new Font("Arial", Font.BOLD, 14));
-        lblChemins.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JPanel panel = new JPanel(new BorderLayout(5, 5));
+        panel.setPreferredSize(new Dimension(350, 0));
+        panel.setBorder(new EmptyBorder(0, 0, 0, 10));
 
-        listChemins.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        JPanel listPanel = new JPanel(new BorderLayout());
+        listPanel.setBorder(BorderFactory.createTitledBorder("Chemins disponibles"));
+
         listChemins.setCellRenderer(new CheminCellRenderer());
         listChemins.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting() && listChemins.getSelectedValue() != null) {
-                onCheminRepaint.run();
-                
+            if (!e.getValueIsAdjusting()) {
+                onSelectionChanged.run();
             }
         });
 
         JScrollPane scrollPane = new JScrollPane(listChemins);
-        scrollPane.setPreferredSize(new Dimension(280, 300));
-        scrollPane.setMaximumSize(new Dimension(280, 300));
+        scrollPane.setPreferredSize(new Dimension(0, 200));
+        listPanel.add(scrollPane, BorderLayout.CENTER);
 
-        JPanel panelBoutons = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
-        panelBoutons.setBackground(new Color(245, 245, 245));
-        panelBoutons.setMaximumSize(new Dimension(280, 40));
-
-
-        btnDemarrer.setPreferredSize(new Dimension(130, 30));
-        btnDemarrer.setBackground(new Color(33, 150, 243));
+        JPanel btnPanel = new JPanel(new GridLayout(1, 2, 5, 0));
+        btnPanel.setBorder(new EmptyBorder(5, 0, 0, 0));
+        btnDemarrer.setBackground(new Color(76, 175, 80));
         btnDemarrer.setForeground(Color.WHITE);
-        btnDemarrer.setFont(new Font("Arial", Font.BOLD, 12));
         btnDemarrer.setFocusPainted(false);
-
-        btnArreter.setPreferredSize(new Dimension(130, 30));
         btnArreter.setBackground(new Color(244, 67, 54));
         btnArreter.setForeground(Color.WHITE);
-        btnArreter.setFont(new Font("Arial", Font.BOLD, 12));
         btnArreter.setFocusPainted(false);
         btnArreter.setEnabled(false);
+        btnPanel.add(btnDemarrer);
+        btnPanel.add(btnArreter);
+        listPanel.add(btnPanel, BorderLayout.SOUTH);
 
-        panelBoutons.add(btnDemarrer);
-        panelBoutons.add(btnArreter);
+        JPanel infoPanel = new JPanel(new GridLayout(8, 1, 0, 5));
+        infoPanel.setBorder(BorderFactory.createTitledBorder("Informations du voyage"));
+        infoPanel.add(lblHeureActuelle);
+        infoPanel.add(lblHeureArrivee);
+        infoPanel.add(lblTemps);
+        infoPanel.add(lblPosition);
+        infoPanel.add(lblVitesse);
+        infoPanel.add(lblCarburant);
 
-        JPanel panelInfos = new JPanel();
-        panelInfos.setLayout(new BoxLayout(panelInfos, BoxLayout.Y_AXIS));
-        panelInfos.setBackground(new Color(245, 245, 245));
-        panelInfos.setMaximumSize(new Dimension(280, 200));
-        panelInfos.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(Color.GRAY),
-            "Informations",
-            0, 0,
-            new Font("Arial", Font.BOLD, 14)
-        ));
+        panel.add(listPanel, BorderLayout.NORTH);
+        panel.add(infoPanel, BorderLayout.CENTER);
 
-        lblHeureActuelle.setFont(new Font("Arial", Font.BOLD, 14));
-        lblHeureActuelle.setForeground(new Color(33, 150, 243));
-        lblHeureActuelle.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        lblHeureArrivee.setFont(new Font("Arial", Font.PLAIN, 13));
-        lblHeureArrivee.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        lblTemps.setFont(new Font("Arial", Font.PLAIN, 13));
-        lblTemps.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        lblPosition.setFont(new Font("Arial", Font.PLAIN, 13));
-        lblPosition.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        lblVitesse.setFont(new Font("Arial", Font.PLAIN, 13));
-        lblVitesse.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        lblCarburant.setFont(new Font("Arial", Font.PLAIN, 13));
-        lblCarburant.setForeground(new Color(0, 128, 0));
-        lblCarburant.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        panelInfos.add(lblHeureActuelle);
-        panelInfos.add(Box.createVerticalStrut(5));
-        panelInfos.add(lblHeureArrivee);
-        panelInfos.add(Box.createVerticalStrut(8));
-        panelInfos.add(lblTemps);
-        panelInfos.add(Box.createVerticalStrut(5));
-        panelInfos.add(lblPosition);
-        panelInfos.add(Box.createVerticalStrut(5));
-        panelInfos.add(lblVitesse);
-        panelInfos.add(Box.createVerticalStrut(5));
-        panelInfos.add(lblCarburant);
-        panelInfos.add(lblVitesseMoyenneReelle);
-            panelInfos.add(Box.createVerticalStrut(5));
-            panelInfos.add(btnDetailsVitesse);
-        panel.add(lblChemins);
-        panel.add(Box.createVerticalStrut(5));
-        panel.add(scrollPane);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(panelBoutons);
-        panel.add(Box.createVerticalStrut(10));
-        panel.add(panelInfos);
-        panel.add(Box.createVerticalGlue());
         return panel;
     }
 }

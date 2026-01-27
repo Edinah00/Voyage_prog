@@ -92,20 +92,18 @@ public class LalanaDAO {
     }
 
     public List<String> getAllExtremites() throws SQLException {
-    List<String> extremites = new ArrayList<>();
-    String sql = "SELECT DISTINCT extremite_gauche FROM lalana "
-               + "UNION "
-               + "SELECT DISTINCT extremite_droite FROM lalana";
-
-    try (Connection conn = DatabaseConnection.getOracleConnection();
-         Statement stmt = conn.createStatement();
-         ResultSet rs = stmt.executeQuery(sql)) {
-
-        while (rs.next()) {
-            extremites.add(rs.getString(1)); // ou "EXTREMITE_GAUCHE"
+        List<String> extremites = new ArrayList<>();
+        String sql = "SELECT DISTINCT extremite_gauche FROM lalana UNION SELECT DISTINCT extremite_droite FROM lalana";
+        
+        Connection conn = DatabaseConnection.getOracleConnection();
+        try (Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            
+            while (rs.next()) {
+                extremites.add(rs.getString(1));
+            }
         }
+        
+        return extremites;
     }
-    return extremites;
-}
-
 }

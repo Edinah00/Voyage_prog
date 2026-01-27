@@ -1,10 +1,10 @@
 package src.java.dao;
 
-import src.java.models.Lavaka;
-import src.java.models.Lalana;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import src.java.models.Lalana;
+import src.java.models.Lavaka;
 
 public class LavakaDAO {
 

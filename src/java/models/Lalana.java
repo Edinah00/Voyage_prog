@@ -11,7 +11,8 @@ public class Lalana {
     private double distance; 
     private double largeur; 
     private List<Lavaka> lavaka;
-    private List<Pause> pauses;  
+    private List<Pause> pauses;
+    private List<Simba> simbas;
 
     public Lalana(String nom, String extremiteGauche, String extremiteDroite, double distance, double largeur) {
         this.nom = nom;
@@ -20,7 +21,8 @@ public class Lalana {
         this.distance = distance;
         this.largeur = largeur;
         this.lavaka = new ArrayList<>();
-        this.pauses = new ArrayList<>(); 
+        this.pauses = new ArrayList<>();
+        this.simbas = new ArrayList<>();
     }
 
     public void ajouterLavaka(Lavaka lavak) {
@@ -29,6 +31,10 @@ public class Lalana {
 
     public void ajouterPause(Pause pause) {
         pauses.add(pause);
+    }
+
+    public void ajouterSimba(Simba simba) {
+        simbas.add(simba);
     }
 
     public boolean peutPasser(Voiture voiture) {
@@ -61,6 +67,10 @@ public class Lalana {
 
     public List<Pause> getPauses() {
         return pauses;
+    }
+
+    public List<Simba> getSimbas() {
+        return simbas;
     }
 
     public void setExtremiteGauche(String extremiteGauche) {

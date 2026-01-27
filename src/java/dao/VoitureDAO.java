@@ -4,8 +4,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import src.java.models.Voiture;
-// ato am voiture voyage Mamerina vitesse moyenne . d* vitese moyenne , total / distance 
-// decomposition sy mijery lalana ratsy ; zaraina le lalana , azo ny pt de depart sy ny point d'arrive 
+
 public class VoitureDAO {
 
     public List<Voiture> findAll() throws SQLException {
