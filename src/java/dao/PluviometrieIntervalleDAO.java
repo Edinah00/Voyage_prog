@@ -136,4 +136,19 @@ public class PluviometrieIntervalleDAO {
             pstmt.executeUpdate();
         }
     }
+
+    public void delete(double quantiteMin, double quantiteMax, String materiau) throws SQLException {
+    String sql = "DELETE FROM pluviometrie_intervalle WHERE quantite_min = ? AND quantite_max = ? AND materiau = ?";
+
+    try (Connection conn = DatabaseConnection.getOracleConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setDouble(1, quantiteMin);
+        ps.setDouble(2, quantiteMax);
+        ps.setString(3, materiau);
+
+        ps.executeUpdate();
+    }
+}
+
 }

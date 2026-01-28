@@ -112,17 +112,16 @@ public class MainApp extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-mainPanel.add(PanelFactory.creerPanelHaut(
-        cbDepart, cbArrivee, cbVoiture, txtVitesseMoyenne, txtHeureDepart,
-        btnRechercher, btnGererLavaka, btnGererPause, btnGererReparation,
-        btnGererSimba, btnCalculerCout, btnGererPluviometrie, btnGererIntervalles,
-        btnReinitialiser,
-        () -> {
-            mettreAJourVitesseMoyenne();
-            mettreAJourListeChemins();
-        },
-        () -> reinitialiser()
-    ), BorderLayout.NORTH);
+        mainPanel.add(PanelFactory.creerPanelHaut(
+                cbDepart, cbArrivee, cbVoiture, txtVitesseMoyenne, txtHeureDepart,
+                btnRechercher, btnGererLavaka, btnGererPause, btnGererReparation,
+                btnGererSimba, btnCalculerCout, btnGererPluviometrie, btnGererIntervalles,
+                btnReinitialiser,
+                () -> {
+                    mettreAJourVitesseMoyenne();
+                    mettreAJourListeChemins();
+                },
+                () -> reinitialiser()), BorderLayout.NORTH);
 
         mainPanel.add(PanelFactory.creerPanelGauche(
                 listModel, listChemins,
@@ -581,15 +580,17 @@ mainPanel.add(PanelFactory.creerPanelHaut(
         }
         super.dispose();
     }
-private void ouvrirGestionPluviometrie() {
-    PluviometrieController controller = new PluviometrieController(this);
-    controller.setVisible(true);
-}
 
-private void ouvrirGestionIntervalles() {
-    PluviometrieIntervalleController controller = new PluviometrieIntervalleController(this);
-    controller.setVisible(true);
-}
+    private void ouvrirGestionPluviometrie() {
+        PluviometrieController controller = new PluviometrieController(this);
+        controller.setVisible(true);
+    }
+
+    private void ouvrirGestionIntervalles() {
+        PluviometrieIntervalleController controller = new PluviometrieIntervalleController(this);
+        controller.setVisible(true);
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MainApp());
     }

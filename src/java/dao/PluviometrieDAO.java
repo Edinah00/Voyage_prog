@@ -170,4 +170,18 @@ public class PluviometrieDAO {
             pstmt.executeUpdate();
         }
     }
+    public void delete(String nomLalana, double pkDebut, double pkFin) throws SQLException {
+    String sql = "DELETE FROM pluviometrie WHERE nom_lalana = ? AND pk_debut = ? AND pk_fin = ?";
+
+    try (Connection conn = DatabaseConnection.getOracleConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+
+        ps.setString(1, nomLalana);
+        ps.setDouble(2, pkDebut);
+        ps.setDouble(3, pkFin);
+
+        ps.executeUpdate();
+    }
+}
+
 }

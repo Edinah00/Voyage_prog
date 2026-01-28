@@ -122,7 +122,15 @@ INSERT INTO reparation (id, materiau, profondeur_min, profondeur_max, prix_par_m
 VALUES (reparation_seq.NEXTVAL, 'pave', 0.5, 0.9, 10000);
 
 COMMIT;
+    -- Supprimer les tables
+DROP TABLE pluviometrie CASCADE CONSTRAINTS;
+DROP TABLE pluviometrie_intervalle CASCADE CONSTRAINTS;
 
+-- Supprimer les séquences
+DROP SEQUENCE pluviometrie_seq;
+DROP SEQUENCE pluviometrie_intervalle_seq;
+
+COMMIT;
 -- ============================================================
 -- SCRIPT D'AJOUT DES TABLES PLUVIOMÉTRIE
 -- À exécuter sur Oracle

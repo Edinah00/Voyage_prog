@@ -450,7 +450,7 @@ public class CoutReparationController extends JDialog {
                         String.format("%.2f m", simba.getProfondeur()),
                         String.format("%.0f mm", quantitePluie),
                         materiau,
-                        String.format("%,. 0f Ar", reparation.getPrixParM2()),
+String.format("%,.0f Ar", reparation.getPrixParM2()),
                         String.format("%,.0f Ar", cout)
                     };
                     
