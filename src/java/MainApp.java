@@ -65,16 +65,16 @@ public class MainApp extends JFrame {
         cbVoiture = new JComboBox<>();
         txtVitesseMoyenne = new JTextField("80");
         txtHeureDepart = new JTextField(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
-        
+
         btnRechercher = new JButton("Rechercher Chemins");
         btnRechercher.addActionListener(e -> rechercherChemins());
 
         btnReinitialiser = new JButton("Reinitialiser");
         btnReinitialiser.addActionListener(e -> reinitialiser());
-        
+
         JButton btnGererLavaka = new JButton("Ajouter Lavaka");
         btnGererLavaka.addActionListener(e -> ouvrirGestionLavaka());
-        
+
         JButton btnGererPause = new JButton("Ajouter Pauses");
         btnGererPause.addActionListener(e -> ouvrirGestionPause());
 
@@ -86,16 +86,22 @@ public class MainApp extends JFrame {
 
         JButton btnCalculerCout = new JButton("Réparer");
         btnCalculerCout.addActionListener(e -> ouvrirCalculCout());
-        
+
+        JButton btnGererPluviometrie = new JButton("Ajouter Pluviométrie");
+        btnGererPluviometrie.addActionListener(e -> ouvrirGestionPluviometrie());
+
+        JButton btnGererIntervalles = new JButton("Intervalles Pluie");
+        btnGererIntervalles.addActionListener(e -> ouvrirGestionIntervalles());
+
         listModel = new DefaultListModel<>();
         listChemins = new JList<>(listModel);
-        
+
         btnDemarrer = new JButton("Demarrer");
         btnDemarrer.addActionListener(e -> demarrerVoyage());
-        
+
         btnArreter = new JButton("Arreter");
         btnArreter.addActionListener(e -> arreterVoyage());
-        
+
         lblHeureActuelle = new JLabel("Heure actuelle: --:--");
         lblHeureArrivee = new JLabel("Arrivee estimee: --:--");
         lblTemps = new JLabel("Temps ecoule: 0.00 h");
@@ -106,26 +112,26 @@ public class MainApp extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        mainPanel.add(PanelFactory.creerPanelHaut(
-                cbDepart, cbArrivee, cbVoiture, txtVitesseMoyenne, txtHeureDepart,
-                btnRechercher, btnGererLavaka, btnGererPause, btnGererReparation,
-                btnGererSimba, btnCalculerCout, btnReinitialiser,
-                () -> {
-                    mettreAJourVitesseMoyenne();
-                    mettreAJourListeChemins();
-                },
-                () -> reinitialiser()
-            ), BorderLayout.NORTH);
+mainPanel.add(PanelFactory.creerPanelHaut(
+        cbDepart, cbArrivee, cbVoiture, txtVitesseMoyenne, txtHeureDepart,
+        btnRechercher, btnGererLavaka, btnGererPause, btnGererReparation,
+        btnGererSimba, btnCalculerCout, btnGererPluviometrie, btnGererIntervalles,
+        btnReinitialiser,
+        () -> {
+            mettreAJourVitesseMoyenne();
+            mettreAJourListeChemins();
+        },
+        () -> reinitialiser()
+    ), BorderLayout.NORTH);
 
         mainPanel.add(PanelFactory.creerPanelGauche(
-            listModel, listChemins,
-            btnDemarrer, btnArreter,
-            lblHeureActuelle, lblHeureArrivee, lblTemps, lblPosition, lblVitesse, lblCarburant,
-            () -> {
-                panelChemin.setCheminSelectionne(listChemins.getSelectedValue());
-                panelChemin.repaint();
-            }
-        ), BorderLayout.WEST);
+                listModel, listChemins,
+                btnDemarrer, btnArreter,
+                lblHeureActuelle, lblHeureArrivee, lblTemps, lblPosition, lblVitesse, lblCarburant,
+                () -> {
+                    panelChemin.setCheminSelectionne(listChemins.getSelectedValue());
+                    panelChemin.repaint();
+                }), BorderLayout.WEST);
 
         panelChemin = new CheminPanel();
         panelChemin.setPreferredSize(new Dimension(750, 600));
@@ -156,7 +162,7 @@ public class MainApp extends JFrame {
     private void mettreAJourVitesseMoyenne() {
         Voiture voiture = (Voiture) cbVoiture.getSelectedItem();
         if (voiture != null) {
-            txtVitesseMoyenne.setText(String.valueOf((int)voiture.getVitesseMaximale()));
+            txtVitesseMoyenne.setText(String.valueOf((int) voiture.getVitesseMaximale()));
         }
     }
 
@@ -215,7 +221,7 @@ public class MainApp extends JFrame {
             }
             if (vitesseMoyenne > voiture.getVitesseMaximale()) {
                 showError("La vitesse moyenne (" + vitesseMoyenne + " km/h) ne peut pas depasser\n" +
-                         "la vitesse maximale de la voiture (" + voiture.getVitesseMaximale() + " km/h)");
+                        "la vitesse maximale de la voiture (" + voiture.getVitesseMaximale() + " km/h)");
                 return;
             }
         } catch (NumberFormatException e) {
@@ -276,7 +282,7 @@ public class MainApp extends JFrame {
             }
             if (vitesseMoyenne > voiture.getVitesseMaximale()) {
                 showError("La vitesse moyenne (" + vitesseMoyenne + " km/h) ne peut pas depasser\n" +
-                         "la vitesse maximale de la voiture (" + voiture.getVitesseMaximale() + " km/h)");
+                        "la vitesse maximale de la voiture (" + voiture.getVitesseMaximale() + " km/h)");
                 return;
             }
         } catch (NumberFormatException e) {
@@ -294,8 +300,8 @@ public class MainApp extends JFrame {
 
         if (!cheminItem.isCarburantSuffisant()) {
             showError("Carburant insuffisant pour ce chemin!\n" +
-                     "Necessite: " + String.format("%.1f", cheminItem.getCarburantNecessaire()) + " L\n" +
-                     "Reservoir: " + String.format("%.1f", voiture.getReservoir()) + " L");
+                    "Necessite: " + String.format("%.1f", cheminItem.getCarburantNecessaire()) + " L\n" +
+                    "Reservoir: " + String.format("%.1f", voiture.getReservoir()) + " L");
             return;
         }
 
@@ -327,7 +333,7 @@ public class MainApp extends JFrame {
         panelChemin.setAfficherChemin(true);
         panelChemin.setVoyageActuel(voyageActuel);
         panelChemin.setCheminSelectionne(cheminItem);
-        
+
         demarrerAnimation();
     }
 
@@ -350,11 +356,11 @@ public class MainApp extends JFrame {
         if (animationTimer != null && animationTimer.isRunning()) {
             animationTimer.stop();
         }
-        
+
         voyageActuel = null;
         cheminsTrouves = null;
         dureeEstimee = 0;
-        
+
         btnDemarrer.setEnabled(true);
         btnArreter.setEnabled(false);
         cbDepart.setEnabled(true);
@@ -364,12 +370,12 @@ public class MainApp extends JFrame {
         txtHeureDepart.setEnabled(true);
         listChemins.setEnabled(true);
         btnRechercher.setEnabled(true);
-        
+
         txtHeureDepart.setText(LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
         mettreAJourVitesseMoyenne();
-        
+
         listModel.clear();
-        
+
         lblHeureActuelle.setText("Heure actuelle: --:--");
         lblHeureArrivee.setText("Arrivee estimee: --:--");
         lblTemps.setText("Temps ecoule: 0.00 h");
@@ -377,10 +383,10 @@ public class MainApp extends JFrame {
         lblVitesse.setText("Vitesse: 0.0 km/h");
         lblVitesse.setForeground(Color.BLACK);
         lblCarburant.setText("Carburant: 0.0 L");
-        
+
         panelChemin.setAfficherChemin(false);
         panelChemin.repaint();
-        
+
         chargerDonnees();
 
         showInfo("Interface reinitialisee avec succes!");
@@ -413,17 +419,17 @@ public class MainApp extends JFrame {
                     txtHeureDepart.setEnabled(true);
                     listChemins.setEnabled(true);
                     btnRechercher.setEnabled(true);
-                    
+
                     double carburantUtilise = voyageActuel.getVoiture().calculerConsommation(
-                        voyageActuel.getDistanceTotale()
-                    );
-                    
-                   showInfo("Voyage termine!\n" +
+                            voyageActuel.getDistanceTotale());
+
+                    showInfo("Voyage termine!\n" +
                             "Heure de depart: " + voyageActuel.getHeureDepartFormatee() + "\n" +
                             "Heure d'arrivee: " + voyageActuel.getHeureActuelleFormatee() + "\n" +
                             "Temps total: " + String.format("%.2f heures", voyageActuel.getTempsEcoule()) + "\n" +
                             "Distance: " + String.format("%.1f km", voyageActuel.getDistanceTotale()) + "\n" +
-                            "Vitesse moyenne saisie: " + String.format("%.1f km/h", voyageActuel.getVitesseMoyenne()) + "\n" +
+                            "Vitesse moyenne saisie: " + String.format("%.1f km/h", voyageActuel.getVitesseMoyenne())
+                            + "\n" +
                             "Vitesse moyenne reelle: " + String.format("%.2f km/h", vitesseMoyenneReelle) + "\n" +
                             "Carburant utilise: " + String.format("%.1f L", carburantUtilise));
                 }
@@ -438,7 +444,7 @@ public class MainApp extends JFrame {
         lblTemps.setText(String.format("Temps ecoule: %.2f h", voyageActuel.getTempsEcoule()));
         lblPosition.setText(String.format("Position: %.1f / %.1f km",
                 voyageActuel.getPositionAbsolue(), voyageActuel.getDistanceTotale()));
-        
+
         if (voyageActuel.isEnPause() && voyageActuel.getPauseActuelle() != null) {
             lblVitesse.setText("PAUSE jusqu'a " + voyageActuel.getPauseActuelle().getHeureFinFormatee());
             lblVitesse.setForeground(Color.RED);
@@ -446,33 +452,32 @@ public class MainApp extends JFrame {
             lblVitesse.setText(String.format("Vitesse: %.1f km/h", voyageActuel.getVitesseEffective()));
             lblVitesse.setForeground(Color.BLACK);
         }
-        
+
         double carburantUtilise = voyageActuel.getVoiture().calculerConsommation(
-            voyageActuel.getPositionAbsolue()
-        );
+                voyageActuel.getPositionAbsolue());
         lblCarburant.setText(String.format("Carburant: %.1f L", carburantUtilise));
     }
 
     private void ouvrirGestionLavaka() {
         CheminItem cheminSelectionne = listChemins.getSelectedValue();
-        
+
         LavakaController controller;
         if (cheminSelectionne != null) {
             controller = new LavakaController(this, cheminSelectionne.getChemin());
         } else {
             controller = new LavakaController(this);
         }
-        
+
         controller.setVisible(true);
-        
+
         try {
             for (Lalana l : lalanas) {
                 l.getLavakas().clear();
             }
-            
+
             LavakaDAO lavakaDAO = new LavakaDAO();
             lavakaDAO.chargerLavakasPourLalanas(lalanas);
-            
+
             if (voyageActuel != null) {
                 panelChemin.repaint();
             }
@@ -488,26 +493,26 @@ public class MainApp extends JFrame {
 
     private void ouvrirGestionPause() {
         CheminItem cheminSelectionne = listChemins.getSelectedValue();
-        
+
         PauseController controller;
         if (cheminSelectionne != null) {
             controller = new PauseController(this, cheminSelectionne.getChemin());
         } else {
             controller = new PauseController(this);
         }
-        
+
         controller.setVisible(true);
-        
+
         try {
             for (Lalana l : lalanas) {
                 if (l.getPauses() != null) {
                     l.getPauses().clear();
                 }
             }
-            
+
             PauseDAO pauseDAO = new PauseDAO();
             pauseDAO.chargerPausesPourLalanas(lalanas);
-            
+
             if (voyageActuel != null) {
                 panelChemin.repaint();
             }
@@ -518,24 +523,24 @@ public class MainApp extends JFrame {
 
     private void ouvrirGestionSimba() {
         CheminItem cheminSelectionne = listChemins.getSelectedValue();
-        
+
         SimbaController controller;
         if (cheminSelectionne != null) {
             controller = new SimbaController(this, cheminSelectionne.getChemin());
         } else {
             controller = new SimbaController(this);
         }
-        
+
         controller.setVisible(true);
-        
+
         try {
             for (Lalana l : lalanas) {
                 l.getSimbas().clear();
             }
-            
+
             SimbaDAO simbaDAO = new SimbaDAO();
             simbaDAO.chargerSimbasPourLalanas(lalanas);
-            
+
             if (voyageActuel != null) {
                 panelChemin.repaint();
             }
@@ -546,12 +551,12 @@ public class MainApp extends JFrame {
 
     private void ouvrirCalculCout() {
         CheminItem cheminSelectionne = listChemins.getSelectedValue();
-        
+
         if (cheminSelectionne == null) {
             showError("Veuillez selectionner un chemin pour calculer le cout de reparation");
             return;
         }
-        
+
         CoutReparationController controller = new CoutReparationController(this, cheminSelectionne.getChemin());
         controller.setVisible(true);
     }
@@ -576,7 +581,15 @@ public class MainApp extends JFrame {
         }
         super.dispose();
     }
+private void ouvrirGestionPluviometrie() {
+    PluviometrieController controller = new PluviometrieController(this);
+    controller.setVisible(true);
+}
 
+private void ouvrirGestionIntervalles() {
+    PluviometrieIntervalleController controller = new PluviometrieIntervalleController(this);
+    controller.setVisible(true);
+}
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MainApp());
     }

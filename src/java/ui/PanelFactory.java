@@ -20,16 +20,20 @@ public class PanelFactory {
             JButton btnGererReparation,
             JButton btnGererSimba,
             JButton btnCalculerCout,
+            JButton btnGererPluviometrie,      // NOUVEAU
+            JButton btnGererIntervalles,       // NOUVEAU
             JButton btnReinitialiser,
             Runnable onVoitureChanged,
             Runnable onReinitialiser) {
 
         JPanel mainPanel = new JPanel(new GridLayout(1, 2, 15, 0));
         mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        mainPanel.setBackground(Color.WHITE);
 
         // BLOC GAUCHE - Configuration du voyage
         JPanel blocGauche = new JPanel(new GridBagLayout());
         blocGauche.setBorder(BorderFactory.createTitledBorder("Configuration du Voyage"));
+        blocGauche.setBackground(Color.WHITE);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -67,12 +71,13 @@ public class PanelFactory {
 
         // Boutons Rechercher et Reinitialiser
         JPanel btnPanelGauche = new JPanel(new GridLayout(1, 2, 5, 0));
-        btnRechercher.setBackground(new Color(33, 150, 243));
+        btnPanelGauche.setBackground(Color.WHITE);
+        btnRechercher.setBackground(Color.BLACK);
         btnRechercher.setForeground(Color.WHITE);
         btnRechercher.setFocusPainted(false);
         btnPanelGauche.add(btnRechercher);
         
-        btnReinitialiser.setBackground(new Color(156, 39, 176));
+        btnReinitialiser.setBackground(Color.DARK_GRAY);
         btnReinitialiser.setForeground(Color.WHITE);
         btnReinitialiser.setFocusPainted(false);
         btnPanelGauche.add(btnReinitialiser);
@@ -83,31 +88,41 @@ public class PanelFactory {
         // BLOC DROIT - Gestion des données
         JPanel blocDroit = new JPanel(new GridBagLayout());
         blocDroit.setBorder(BorderFactory.createTitledBorder("Gestion des Donnees"));
+        blocDroit.setBackground(Color.WHITE);
         GridBagConstraints gbc2 = new GridBagConstraints();
         gbc2.insets = new Insets(5, 5, 5, 5);
         gbc2.fill = GridBagConstraints.HORIZONTAL;
         gbc2.weightx = 1.0;
 
-        // Style des boutons
-        btnGererLavaka.setBackground(new Color(255, 152, 0));
+        // STYLE NOIR ET BLANC
+        btnGererLavaka.setBackground(Color.BLACK);
         btnGererLavaka.setForeground(Color.WHITE);
         btnGererLavaka.setFocusPainted(false);
         
-        btnGererPause.setBackground(new Color(103, 58, 183));
+        btnGererPause.setBackground(Color.BLACK);
         btnGererPause.setForeground(Color.WHITE);
         btnGererPause.setFocusPainted(false);
         
-        btnGererReparation.setBackground(new Color(0, 150, 136));
+        btnGererReparation.setBackground(Color.BLACK);
         btnGererReparation.setForeground(Color.WHITE);
         btnGererReparation.setFocusPainted(false);
         
-        btnGererSimba.setBackground(new Color(233, 30, 99));
+        btnGererSimba.setBackground(Color.BLACK);
         btnGererSimba.setForeground(Color.WHITE);
         btnGererSimba.setFocusPainted(false);
         
-        btnCalculerCout.setBackground(new Color(76, 175, 80));
+        btnCalculerCout.setBackground(Color.BLACK);
         btnCalculerCout.setForeground(Color.WHITE);
         btnCalculerCout.setFocusPainted(false);
+
+        // NOUVEAUX BOUTONS - Style noir et blanc
+        btnGererPluviometrie.setBackground(Color.BLACK);
+        btnGererPluviometrie.setForeground(Color.WHITE);
+        btnGererPluviometrie.setFocusPainted(false);
+
+        btnGererIntervalles.setBackground(Color.BLACK);
+        btnGererIntervalles.setForeground(Color.WHITE);
+        btnGererIntervalles.setFocusPainted(false);
 
         // Ajout des boutons
         gbc2.gridx = 0; gbc2.gridy = 0;
@@ -125,8 +140,15 @@ public class PanelFactory {
         gbc2.gridy = 4;
         blocDroit.add(btnCalculerCout, gbc2);
 
-        // Ajouter un espace vide pour aligner avec le bloc gauche
+        // NOUVEAUX BOUTONS
         gbc2.gridy = 5;
+        blocDroit.add(btnGererPluviometrie, gbc2);
+
+        gbc2.gridy = 6;
+        blocDroit.add(btnGererIntervalles, gbc2);
+
+        // Ajouter un espace vide pour aligner
+        gbc2.gridy = 7;
         gbc2.weighty = 1.0;
         gbc2.fill = GridBagConstraints.BOTH;
         blocDroit.add(new JPanel(), gbc2);
@@ -154,9 +176,11 @@ public class PanelFactory {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.setPreferredSize(new Dimension(350, 0));
         panel.setBorder(new EmptyBorder(0, 0, 0, 10));
+        panel.setBackground(Color.WHITE);
 
         JPanel listPanel = new JPanel(new BorderLayout());
         listPanel.setBorder(BorderFactory.createTitledBorder("Chemins disponibles"));
+        listPanel.setBackground(Color.WHITE);
 
         listChemins.setCellRenderer(new CheminCellRenderer());
         listChemins.addListSelectionListener(e -> {
@@ -164,6 +188,7 @@ public class PanelFactory {
                 onSelectionChanged.run();
             }
         });
+        listChemins.setBackground(Color.WHITE);
 
         JScrollPane scrollPane = new JScrollPane(listChemins);
         scrollPane.setPreferredSize(new Dimension(0, 200));
@@ -171,19 +196,25 @@ public class PanelFactory {
 
         JPanel btnPanel = new JPanel(new GridLayout(1, 2, 5, 0));
         btnPanel.setBorder(new EmptyBorder(5, 0, 0, 0));
-        btnDemarrer.setBackground(new Color(76, 175, 80));
+        btnPanel.setBackground(Color.WHITE);
+        
+        // STYLE NOIR ET BLANC
+        btnDemarrer.setBackground(Color.BLACK);
         btnDemarrer.setForeground(Color.WHITE);
         btnDemarrer.setFocusPainted(false);
-        btnArreter.setBackground(new Color(244, 67, 54));
+        
+        btnArreter.setBackground(Color.DARK_GRAY);
         btnArreter.setForeground(Color.WHITE);
         btnArreter.setFocusPainted(false);
         btnArreter.setEnabled(false);
+        
         btnPanel.add(btnDemarrer);
         btnPanel.add(btnArreter);
         listPanel.add(btnPanel, BorderLayout.SOUTH);
 
         JPanel infoPanel = new JPanel(new GridLayout(8, 1, 0, 5));
         infoPanel.setBorder(BorderFactory.createTitledBorder("Informations du voyage"));
+        infoPanel.setBackground(Color.WHITE);
         infoPanel.add(lblHeureActuelle);
         infoPanel.add(lblHeureArrivee);
         infoPanel.add(lblTemps);

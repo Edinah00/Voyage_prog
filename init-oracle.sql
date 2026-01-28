@@ -122,3 +122,41 @@ INSERT INTO reparation (id, materiau, profondeur_min, profondeur_max, prix_par_m
 VALUES (reparation_seq.NEXTVAL, 'pave', 0.5, 0.9, 10000);
 
 COMMIT;
+
+-- ============================================================
+-- SCRIPT D'AJOUT DES TABLES PLUVIOMÉTRIE
+-- À exécuter sur Oracle
+-- ============================================================
+
+-- Créer les séquences
+CREATE SEQUENCE pluviometrie_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE pluviometrie_intervalle_seq START WITH 1 INCREMENT BY 1;
+
+-- ============================================================
+-- TABLE PLUVIOMETRIE
+-- Représente une zone de route avec une quantité de pluie
+-- ============================================================
+CREATE TABLE pluviometrie (
+    id NUMBER PRIMARY KEY,
+    lalana_nom VARCHAR2(100) NOT NULL,
+    debut_lalana NUMBER(10, 2) NOT NULL,
+    fin_lalana NUMBER(10, 2) NOT NULL,
+    quantite_pluie NUMBER(10, 2) NOT NULL,
+    CONSTRAINT fk_pluviometrie_lalana FOREIGN KEY (lalana_nom) 
+        REFERENCES lalana(nom) ON DELETE CASCADE,
+    CONSTRAINT chk_pk_pluvio CHECK (debut_lalana < fin_lalana),
+    CONSTRAINT chk_quantite_pluie CHECK (quantite_pluie >= 0)
+);
+
+-- ============================================================
+-- TABLE PLUVIOMETRIE_INTERVALLE
+-- Détermine quel matériau utiliser selon la quantité de pluie
+-- ============================================================
+CREATE TABLE pluviometrie_intervalle (
+    id NUMBER PRIMARY KEY,
+    quantite_min NUMBER(10, 2) NOT NULL,
+    quantite_max NUMBER(10, 2) NOT NULL,
+    materiau VARCHAR2(100) NOT NULL,
+    CONSTRAINT chk_intervalle_pluvio CHECK (quantite_min < quantite_max),
+    CONSTRAINT chk_quantite_min CHECK (quantite_min >= 0)
+);
