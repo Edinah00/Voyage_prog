@@ -152,8 +152,8 @@ public class PluviometrieIntervalleController extends JDialog {
             PluviometrieIntervalle intervalle = new PluviometrieIntervalle(quantiteMin, quantiteMax, materiau);
             intervallesEnAttente.add(intervalle);
 
-            Object[] row = {String.format("%.1f", quantiteMin),
-                           String.format("%.1f", quantiteMax),
+            Object[] row = {String.format("%.2f", quantiteMin),
+                           String.format("%.2f", quantiteMax),
                            materiau,
                            "Supprimer"};
             tableModel.addRow(row);

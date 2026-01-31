@@ -181,9 +181,9 @@ public class PluviometrieController extends JDialog {
             pluviometriesEnAttente.add(pluvio);
 
             Object[] row = {nomLalana, 
-                           String.format("%.1f", debut),
-                           String.format("%.1f", fin),
-                           String.format("%.1f", quantitePluie),
+                           String.format("%.2f", debut),
+                           String.format("%.2f", fin),
+                           String.format("%.2f", quantitePluie),
                            "Supprimer"};
             tableModel.addRow(row);
 

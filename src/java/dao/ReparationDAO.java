@@ -55,9 +55,16 @@ public class ReparationDAO {
         return reparations;
     }
 
-    // MODIFIÉ: Intervalle ]profondeur_min, profondeur_max]
-    // Ouvert à gauche (>) et fermé à droite (<=)
+    /**
+     * CORRIGÉ: Intervalle ]profondeur_min, profondeur_max]
+     * Ouvert à gauche (>) et fermé à droite (<=)
+     * 
+     * Exemples:
+     * ]0.00 - 0.20] → 0.10 ✓ | 0.20 ✓ | 0.00 ✗
+     * ]0.20 - 0.40] → 0.30 ✓ | 0.40 ✓ | 0.20 ✗
+     */
     public Reparation findByMateriauAndProfondeur(String materiau, double profondeur) throws SQLException {
+        // CORRIGÉ: profondeur > profondeur_min ET profondeur <= profondeur_max
         String sql = "SELECT * FROM reparation WHERE materiau = ? AND profondeur_min < ? AND profondeur_max >= ?";
         
         Connection conn = DatabaseConnection.getOracleConnection();

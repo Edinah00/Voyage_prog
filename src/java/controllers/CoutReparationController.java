@@ -22,7 +22,7 @@ import src.java.services.MateriauAutomatiqueService.MateriauNotFoundException;
 
 /**
  * Contrôleur pour calculer automatiquement le coût de réparation des Simba
- * Le matériau est maintenant déterminé AUTOMATIQUEMENT basé sur la pluviométrie
+ * avec possibilité de filtrer par plage kilométrique
  */
 public class CoutReparationController extends JDialog {
 
@@ -32,6 +32,14 @@ public class CoutReparationController extends JDialog {
     private JButton btnTrierAsc;
     private JButton btnTrierDesc;
     private JButton btnReinitialiser;
+    
+    // NOUVEAUX COMPOSANTS POUR LE FILTRE
+    private JTextField txtPointDebut;
+    private JTextField txtPointFin;
+    private JButton btnValiderFiltre;
+    private JButton btnRetirerFiltre;
+    private JLabel lblNbSimbasFiltres;
+    private JCheckBox chkActiverFiltre;
     
     private JTable tableResultats;
     private DefaultTableModel tableModel;
@@ -44,14 +52,20 @@ public class CoutReparationController extends JDialog {
 
     private List<Lalana> chemins;
     private List<Simba> simbasActuels;
+    private List<Simba> simbasFiltres;  // NOUVEAU : liste filtrée
     private ReparationSimbaService reparationService;
     private ReparationDAO reparationDAO;
     private SimbaDAO simbaDAO;
     private MateriauAutomatiqueService materiauService;
+    
+    // NOUVEAUX ATTRIBUTS
+    private boolean filtreActif = false;
+    private double pointDebut = 0;
+    private double pointFin = Double.MAX_VALUE;
 
     public CoutReparationController(Frame parent, List<Lalana> chemins) {
         super(parent, "Calcul Automatique - Réparation par Pluviométrie", true);
-        setSize(1400, 850);
+        setSize(1400, 900);
         setLocationRelativeTo(parent);
         
         this.chemins = chemins;
@@ -60,6 +74,7 @@ public class CoutReparationController extends JDialog {
         this.simbaDAO = new SimbaDAO();
         this.materiauService = new MateriauAutomatiqueService();
         this.simbasActuels = new ArrayList<>();
+        this.simbasFiltres = new ArrayList<>();
         
         initComponents();
         chargerDonnees();
@@ -94,9 +109,9 @@ public class CoutReparationController extends JDialog {
             new EmptyBorder(0, 0, 15, 0)
         ));
 
-        // Titre et info
-        JPanel titlePanel = new JPanel(new BorderLayout());
-        titlePanel.setBackground(Color.WHITE);
+        // Panel principal avec titre et sélection
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(Color.WHITE);
         
         JLabel lblTitre = new JLabel("Système de Réparation Automatique");
         lblTitre.setFont(new Font("Arial", Font.BOLD, 24));
@@ -111,9 +126,6 @@ public class CoutReparationController extends JDialog {
         textPanel.add(lblTitre);
         textPanel.add(lblSubtitle);
         
-        titlePanel.add(textPanel, BorderLayout.WEST);
-
-        // Sélection du chemin
         JPanel selectionPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         selectionPanel.setBackground(Color.WHITE);
         
@@ -127,11 +139,93 @@ public class CoutReparationController extends JDialog {
         cbChemin.addActionListener(e -> chargerSimbasDuChemin());
         selectionPanel.add(cbChemin);
         
-        titlePanel.add(selectionPanel, BorderLayout.EAST);
+        topPanel.add(textPanel, BorderLayout.WEST);
+        topPanel.add(selectionPanel, BorderLayout.EAST);
         
-        headerPanel.add(titlePanel, BorderLayout.CENTER);
+        // ==================== NOUVEAU PANEL DE FILTRE ====================
+        JPanel filtrePanel = createFiltrePanel();
+        
+        headerPanel.add(topPanel, BorderLayout.NORTH);
+        headerPanel.add(filtrePanel, BorderLayout.SOUTH);
 
         return headerPanel;
+    }
+
+    /**
+     * NOUVEAU : Création du panel de filtre par plage kilométrique
+     */
+    private JPanel createFiltrePanel() {
+        JPanel filtrePanel = new JPanel(new BorderLayout(10, 10));
+        filtrePanel.setBackground(new Color(245, 245, 245));
+        filtrePanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(Color.LIGHT_GRAY),
+            new EmptyBorder(10, 10, 10, 10)
+        ));
+
+        // Panel de gauche : activation du filtre
+        JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        leftPanel.setBackground(new Color(245, 245, 245));
+        
+        chkActiverFiltre = new JCheckBox("Activer le filtre par plage kilométrique");
+        chkActiverFiltre.setFont(new Font("Arial", Font.BOLD, 13));
+        chkActiverFiltre.setBackground(new Color(245, 245, 245));
+        chkActiverFiltre.addActionListener(e -> toggleFiltre());
+        leftPanel.add(chkActiverFiltre);
+
+        // Panel central : champs de saisie
+        JPanel centerPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
+        centerPanel.setBackground(new Color(245, 245, 245));
+        
+        JLabel lblDebut = new JLabel("PK Début (km):");
+        lblDebut.setFont(new Font("Arial", Font.PLAIN, 12));
+        centerPanel.add(lblDebut);
+        
+        txtPointDebut = new JTextField(8);
+        txtPointDebut.setFont(new Font("Arial", Font.PLAIN, 12));
+        txtPointDebut.setEnabled(false);
+        centerPanel.add(txtPointDebut);
+        
+        JLabel lblFin = new JLabel("PK Fin (km):");
+        lblFin.setFont(new Font("Arial", Font.PLAIN, 12));
+        centerPanel.add(lblFin);
+        
+        txtPointFin = new JTextField(8);
+        txtPointFin.setFont(new Font("Arial", Font.PLAIN, 12));
+        txtPointFin.setEnabled(false);
+        centerPanel.add(txtPointFin);
+
+        // Panel de droite : boutons d'action
+        JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        rightPanel.setBackground(new Color(245, 245, 245));
+        
+        btnValiderFiltre = new JButton("✓ Appliquer");
+        btnValiderFiltre.setBackground(Color.BLACK);
+        btnValiderFiltre.setForeground(Color.WHITE);
+        btnValiderFiltre.setFont(new Font("Arial", Font.BOLD, 12));
+        btnValiderFiltre.setFocusPainted(false);
+        btnValiderFiltre.setEnabled(false);
+        btnValiderFiltre.addActionListener(e -> appliquerFiltre());
+        rightPanel.add(btnValiderFiltre);
+        
+        btnRetirerFiltre = new JButton("✕ Retirer");
+        btnRetirerFiltre.setBackground(Color.DARK_GRAY);
+        btnRetirerFiltre.setForeground(Color.WHITE);
+        btnRetirerFiltre.setFont(new Font("Arial", Font.PLAIN, 12));
+        btnRetirerFiltre.setFocusPainted(false);
+        btnRetirerFiltre.setEnabled(false);
+        btnRetirerFiltre.addActionListener(e -> retirerFiltre());
+        rightPanel.add(btnRetirerFiltre);
+        
+        lblNbSimbasFiltres = new JLabel("");
+        lblNbSimbasFiltres.setFont(new Font("Arial", Font.BOLD, 12));
+        lblNbSimbasFiltres.setForeground(new Color(0, 100, 0));
+        rightPanel.add(lblNbSimbasFiltres);
+
+        filtrePanel.add(leftPanel, BorderLayout.WEST);
+        filtrePanel.add(centerPanel, BorderLayout.CENTER);
+        filtrePanel.add(rightPanel, BorderLayout.EAST);
+
+        return filtrePanel;
     }
 
     private JPanel createCenterPanel() {
@@ -411,10 +505,139 @@ public class CoutReparationController extends JDialog {
         }
     }
 
+    /**
+     * NOUVEAU : Active/désactive le filtre
+     */
+    private void toggleFiltre() {
+        boolean actif = chkActiverFiltre.isSelected();
+        txtPointDebut.setEnabled(actif);
+        txtPointFin.setEnabled(actif);
+        btnValiderFiltre.setEnabled(actif);
+        
+        if (!actif && filtreActif) {
+            // Nettoyer le filtre sans toucher à la checkbox (évite la boucle infinie)
+            filtreActif = false;
+            pointDebut = 0;
+            pointFin = Double.MAX_VALUE;
+            simbasFiltres.clear();
+            txtPointDebut.setText("");
+            txtPointFin.setText("");
+            btnRetirerFiltre.setEnabled(false);
+            lblNbSimbasFiltres.setText("");
+            
+            // Recalculer avec la liste complète
+            if (!simbasActuels.isEmpty()) {
+                calculerCoutsAutomatique();
+            }
+        }
+    }
+
+    /**
+     * NOUVEAU : Applique le filtre par plage kilométrique
+     */
+    private void appliquerFiltre() {
+        try {
+            // Validation des champs
+            if (txtPointDebut.getText().trim().isEmpty() || txtPointFin.getText().trim().isEmpty()) {
+                showError("Veuillez saisir les deux points (début et fin)");
+                return;
+            }
+
+            pointDebut = Double.parseDouble(txtPointDebut.getText().trim());
+            pointFin = Double.parseDouble(txtPointFin.getText().trim());
+
+            // Validation de la logique
+            if (pointDebut < 0 || pointFin < 0) {
+                showError("Les points kilométriques doivent être positifs");
+                return;
+            }
+
+            if (pointDebut >= pointFin) {
+                showError("Le point de début doit être inférieur au point de fin");
+                return;
+            }
+
+            // Filtrer les Simbas
+            simbasFiltres = getSimbaFiltre(simbasActuels, pointDebut, pointFin);
+
+            if (simbasFiltres.isEmpty()) {
+                // Activer le filtre même s'il est vide
+                filtreActif = true;
+                btnRetirerFiltre.setEnabled(true);
+                lblNbSimbasFiltres.setText("→ 0 simba dans la plage");
+                
+                // Vider le tableau et mettre les statistiques à zéro
+                tableModel.setRowCount(0);
+                statsModel.setRowCount(0);
+                lblNbSimbas.setText("0 simba(s)");
+                lblCoutTotal.setText("0 Ar");
+                lblCoutMoyen.setText("0 Ar");
+                
+                showInfo("Aucun Simba trouvé dans la plage [" + pointDebut + " - " + pointFin + "] km\n\nCoût total: 0 Ar");
+                return;
+            }
+
+            // Activer le filtre
+            filtreActif = true;
+            btnRetirerFiltre.setEnabled(true);
+            lblNbSimbasFiltres.setText("→ " + simbasFiltres.size() + " simba(s) dans la plage");
+            
+            // Recalculer automatiquement avec la liste filtrée
+            calculerCoutsAutomatique();
+
+        } catch (NumberFormatException e) {
+            showError("Veuillez entrer des valeurs numériques valides");
+        }
+    }
+
+    /**
+     * NOUVEAU : Retire le filtre et restaure la liste complète
+     */
+    private void retirerFiltre() {
+        // Désactiver temporairement l'écouteur pour éviter la boucle
+        filtreActif = false;
+        pointDebut = 0;
+        pointFin = Double.MAX_VALUE;
+        simbasFiltres.clear();
+        txtPointDebut.setText("");
+        txtPointFin.setText("");
+        btnRetirerFiltre.setEnabled(false);
+        lblNbSimbasFiltres.setText("");
+        
+        // Décocher la checkbox SANS déclencher l'événement
+        txtPointDebut.setEnabled(false);
+        txtPointFin.setEnabled(false);
+        btnValiderFiltre.setEnabled(false);
+        chkActiverFiltre.setSelected(false);
+        
+        // Recalculer avec la liste complète
+        if (!simbasActuels.isEmpty()) {
+            calculerCoutsAutomatique();
+        }
+    }
+
+   
+    private List<Simba> getSimbaFiltre(List<Simba> simbas, double pkDebut, double pkFin) {
+        List<Simba> resultat = new ArrayList<>();
+        
+        for (Simba simba : simbas) {
+            double pk = simba.getPk();
+            if (pk >= pkDebut && pk <= pkFin) {
+                resultat.add(simba);
+            }
+        }
+        
+        return resultat;
+    }
+
+    
     private void calculerCoutsAutomatique() {
         try {
             tableModel.setRowCount(0);
             statsModel.setRowCount(0);
+            
+            // MODIFIÉ : Utiliser la liste filtrée si le filtre est actif
+            List<Simba> simbasATraiter = filtreActif ? simbasFiltres : simbasActuels;
             
             double coutTotal = 0;
             int erreursCount = 0;
@@ -422,7 +645,7 @@ public class CoutReparationController extends JDialog {
             Map<String, Integer> countByMateriau = new HashMap<>();
             Map<String, Double> coutByMateriau = new HashMap<>();
             
-            for (Simba simba : simbasActuels) {
+            for (Simba simba : simbasATraiter) {
                 try {
                     MateriauAutomatiqueService.DetailMateriauAutomatique detail = 
                         materiauService.obtenirDetailsMateriauPourSimba(simba);
@@ -450,7 +673,7 @@ public class CoutReparationController extends JDialog {
                         String.format("%.2f m", simba.getProfondeur()),
                         String.format("%.0f mm", quantitePluie),
                         materiau,
-String.format("%,.0f Ar", reparation.getPrixParM2()),
+                        String.format("%,.0f Ar", reparation.getPrixParM2()),
                         String.format("%,.0f Ar", cout)
                     };
                     
@@ -468,9 +691,10 @@ String.format("%,.0f Ar", reparation.getPrixParM2()),
             }
             
             // Mise à jour des statistiques
+            lblNbSimbas.setText(simbasATraiter.size() + " simba(s)");
             lblCoutTotal.setText(String.format("%,.0f Ar", coutTotal));
             lblCoutMoyen.setText(String.format("%,.0f Ar", 
-                simbasActuels.size() > 0 ? coutTotal / simbasActuels.size() : 0));
+                simbasATraiter.size() > 0 ? coutTotal / simbasATraiter.size() : 0));
             
             // Tableau par matériau
             for (Map.Entry<String, Integer> entry : countByMateriau.entrySet()) {
@@ -482,13 +706,17 @@ String.format("%,.0f Ar", reparation.getPrixParM2()),
                 });
             }
             
+            // Message de résultat
+            String messageFiltre = filtreActif ? 
+                String.format("\nPlage filtrée: [%.1f - %.1f] km", pointDebut, pointFin) : "";
+            
             if (erreursCount > 0) {
-                showWarning("Calcul terminé avec " + erreursCount + " erreur(s):\n\n" + 
+                showWarning("Calcul terminé avec " + erreursCount + " erreur(s):" + messageFiltre + "\n\n" + 
                     erreursDetails.toString());
             } else {
-                showInfo("✓ Calcul automatique terminé avec succès!\n\n" +
+                showInfo("✓ Calcul automatique terminé avec succès!" + messageFiltre + "\n\n" +
                     String.format("%d simba(s) traité(s)\nCoût total: %,.0f Ar", 
-                    simbasActuels.size(), coutTotal));
+                    simbasATraiter.size(), coutTotal));
             }
             
         } catch (SQLException e) {
@@ -535,6 +763,7 @@ String.format("%,.0f Ar", reparation.getPrixParM2()),
         lblNbSimbas.setText("0");
         lblCoutMoyen.setText("0 Ar");
         lblCoutTotal.setText("0 Ar");
+        retirerFiltre();
     }
 
     private void showError(String message) {
