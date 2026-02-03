@@ -1,4 +1,4 @@
-package src.java.controllers;
+package controllers;
 
 import java.awt.*;
 import java.sql.SQLException;
@@ -8,10 +8,10 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import src.java.dao.LalanaDAO;
-import src.java.dao.PauseDAO;
-import src.java.models.Lalana;
-import src.java.models.Pause;
+import dao.LalanaDAO;
+import dao.PauseDAO;
+import models.Lalana;
+import models.Pause;
 
 public class PauseController extends JDialog {
 

@@ -1,12 +1,12 @@
-package src.java.controllers;
+package controllers;
 
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import src.java.dao.ReparationDAO;
-import src.java.models.Reparation;
+import dao.ReparationDAO;
+import models.Reparation;
 
 public class ReparationController extends JDialog {
 

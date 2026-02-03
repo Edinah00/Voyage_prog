@@ -1,4 +1,4 @@
-package src.java.controllers;
+package controllers;
 
 import java.awt.*;
 import java.sql.SQLException;
@@ -8,10 +8,10 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import src.java.dao.LalanaDAO;
-import src.java.dao.PluviometrieDAO;
-import src.java.models.Lalana;
-import src.java.models.Pluviometrie;
+import dao.LalanaDAO;
+import dao.PluviometrieDAO;
+import models.Lalana;
+import models.Pluviometrie;
 
 /**
  * Contrôleur pour gérer l'ajout multiple de zones de pluviométrie

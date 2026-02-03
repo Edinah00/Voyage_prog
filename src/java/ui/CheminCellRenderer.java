@@ -1,6 +1,6 @@
-package src.java.ui;
+package ui;
 
-import src.java.models.CheminItem;
+import models.CheminItem;
 import javax.swing.*;
 import java.awt.*;
 

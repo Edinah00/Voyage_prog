@@ -1,9 +1,9 @@
-package src.java.services;
+package services;
 
 import java.util.List;
-import src.java.models.Lalana;
-import src.java.models.Lavaka;
-import src.java.models.Voyage;
+import models.Lalana;
+import models.Lavaka;
+import models.Voyage;
 
 public class VoyageService {
 

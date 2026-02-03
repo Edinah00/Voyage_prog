@@ -1,14 +1,14 @@
-package src.java.controllers;
+package controllers;
 
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import src.java.dao.LalanaDAO;
-import src.java.dao.LavakaDAO;
-import src.java.models.Lalana;
-import src.java.models.Lavaka;
+import dao.LalanaDAO;
+import dao.LavakaDAO;
+import models.Lalana;
+import models.Lavaka;
 
 public class LavakaController extends JDialog {
 

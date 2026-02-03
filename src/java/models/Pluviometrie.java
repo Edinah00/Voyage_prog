@@ -1,4 +1,4 @@
-package src.java.models;
+package models;
 
 /**
  * Représente une zone de route avec une quantité de pluie spécifique.

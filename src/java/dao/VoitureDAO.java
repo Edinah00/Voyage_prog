@@ -1,9 +1,9 @@
-package src.java.dao;
+package dao;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import src.java.models.Voiture;
+import models.Voiture;
 
 public class VoitureDAO {
 

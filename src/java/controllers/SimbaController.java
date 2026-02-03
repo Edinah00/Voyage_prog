@@ -1,14 +1,14 @@
-package src.java.controllers;
+package controllers;
 
 import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import src.java.dao.LalanaDAO;
-import src.java.dao.SimbaDAO;
-import src.java.models.Lalana;
-import src.java.models.Simba;
+import dao.LalanaDAO;
+import dao.SimbaDAO;
+import models.Lalana;
+import models.Simba;
 
 public class SimbaController extends JDialog {
 

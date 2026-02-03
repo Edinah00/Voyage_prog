@@ -1,8 +1,7 @@
+package services;
 
-package src.java.services;
-
-import src.java.dao.PrixReparationDAO;
-import src.java.models.*;
+import dao.PrixReparationDAO;
+import models.*;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -15,33 +14,33 @@ public class ReparationService {
     }
 
     /**
-     * Calcule le coût de réparation d'un lavaka avec un type de réparation donné
+     * Calcule le coût de réparation d'un simba avec un type de réparation donné
      */
-    public double calculerCoutLavaka(Lavaka lavaka, TypeReparation typeReparation) 
+    public double calculerCoutSimba(Simba simba, TypeReparation typeReparation) 
             throws SQLException {
         
         PrixReparation prix = prixDAO.findPrixPourProfondeur(
             typeReparation.getId(), 
-            lavaka.getProfondeur()
+            simba.getProfondeur()
         );
         
         if (prix == null) {
             return 0;
         }
         
-        return lavaka.getSurface() * prix.getPrixParM2();
+        return simba.getSurface() * prix.getPrixParM2();
     }
 
     /**
-     * Calcule le coût de réparation de tous les lavakas d'un chemin
+     * Calcule le coût de réparation de tous les simbas d'un chemin
      */
     public double calculerCoutChemin(Lalana lalana, TypeReparation typeReparation) 
             throws SQLException {
         
         double coutTotal = 0;
         
-        for (Lavaka lavaka : lalana.getLavakas()) {
-            double cout = calculerCoutLavaka(lavaka, typeReparation);
+        for (Simba simba : lalana.getSimbas()) {
+            double cout = calculerCoutSimba(simba, typeReparation);
             coutTotal += cout;
         }
         
@@ -49,7 +48,7 @@ public class ReparationService {
     }
 
     /**
-     * Calcule le coût de réparation pour plusieurs chemins (par exemple, tout le RN7)
+     * Calcule le coût de réparation pour plusieurs chemins
      */
     public double calculerCoutChemins(List<Lalana> chemins, TypeReparation typeReparation) 
             throws SQLException {
@@ -78,28 +77,26 @@ public class ReparationService {
         rapport.append("Description: ").append(typeReparation.getDescription()).append("\n\n");
         
         rapport.append("═══════════════════════════════════════════════════════════\n");
-        rapport.append("                    DÉTAILS DES LAVAKA                     \n");
+        rapport.append("                    DÉTAILS DES SIMBA                      \n");
         rapport.append("═══════════════════════════════════════════════════════════\n\n");
         
         double coutTotal = 0;
         int compteur = 1;
         
-        for (Lavaka lavaka : lalana.getLavakas()) {
+        for (Simba simba : lalana.getSimbas()) {
             PrixReparation prix = prixDAO.findPrixPourProfondeur(
                 typeReparation.getId(), 
-                lavaka.getProfondeur()
+                simba.getProfondeur()
             );
             
-            rapport.append(String.format("Lavaka %d:\n", compteur++));
+            rapport.append(String.format("Simba %d:\n", compteur++));
             rapport.append(String.format("  📍 Point kilométrique: PK %.1f\n", 
-                lavaka.getPointKilometrique()));
-            rapport.append(String.format("  📍 Position: %.1f - %.1f km\n", 
-                lavaka.getDebut(), lavaka.getFin()));
-            rapport.append(String.format("  📏 Surface: %.1f m²\n", lavaka.getSurface()));
-            rapport.append(String.format("  📊 Profondeur: %.2f m\n", lavaka.getProfondeur()));
+                simba.getPk()));
+            rapport.append(String.format("  📏 Surface: %.1f m²\n", simba.getSurface()));
+            rapport.append(String.format("  📊 Profondeur: %.2f m\n", simba.getProfondeur()));
             
             if (prix != null) {
-                double cout = lavaka.getSurface() * prix.getPrixParM2();
+                double cout = simba.getSurface() * prix.getPrixParM2();
                 rapport.append(String.format("  💰 Prix/m²: %.0f Ar\n", prix.getPrixParM2()));
                 rapport.append(String.format("  💵 Coût total: %.0f Ar\n\n", cout));
                 coutTotal += cout;
@@ -140,7 +137,7 @@ public class ReparationService {
             
             double coutChemin = calculerCoutChemin(lalana, typeReparation);
             
-            rapport.append(String.format("  Nombre de lavaka: %d\n", lalana.getLavakas().size()));
+            rapport.append(String.format("  Nombre de simba: %d\n", lalana.getSimbas().size()));
             rapport.append(String.format("  Coût: %.0f Ar (%.2f millions Ar)\n\n", 
                 coutChemin, coutChemin / 1_000_000));
             
@@ -164,29 +161,29 @@ public class ReparationService {
         
         Map<String, Object> stats = new HashMap<>();
         
-        int nombreLavakas = 0;
+        int nombreSimbas = 0;
         double surfaceTotale = 0;
         double profondeurMoyenne = 0;
         double coutTotal = 0;
         
         for (Lalana lalana : chemins) {
-            for (Lavaka lavaka : lalana.getLavakas()) {
-                nombreLavakas++;
-                surfaceTotale += lavaka.getSurface();
-                profondeurMoyenne += lavaka.getProfondeur();
-                coutTotal += calculerCoutLavaka(lavaka, typeReparation);
+            for (Simba simba : lalana.getSimbas()) {
+                nombreSimbas++;
+                surfaceTotale += simba.getSurface();
+                profondeurMoyenne += simba.getProfondeur();
+                coutTotal += calculerCoutSimba(simba, typeReparation);
             }
         }
         
-        if (nombreLavakas > 0) {
-            profondeurMoyenne /= nombreLavakas;
+        if (nombreSimbas > 0) {
+            profondeurMoyenne /= nombreSimbas;
         }
         
-        stats.put("nombreLavakas", nombreLavakas);
+        stats.put("nombreSimbas", nombreSimbas);
         stats.put("surfaceTotale", surfaceTotale);
         stats.put("profondeurMoyenne", profondeurMoyenne);
         stats.put("coutTotal", coutTotal);
-        stats.put("coutMoyenParLavaka", nombreLavakas > 0 ? coutTotal / nombreLavakas : 0);
+        stats.put("coutMoyenParSimba", nombreSimbas > 0 ? coutTotal / nombreSimbas : 0);
         
         return stats;
     }

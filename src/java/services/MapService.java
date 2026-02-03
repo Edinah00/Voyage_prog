@@ -1,4 +1,4 @@
-package src.java.services;
+package services;
 
 /**
  * Service pour générer le code HTML/JavaScript de la carte interactive
@@ -62,22 +62,17 @@ public class MapService {
 "            max-height: 400px;\n" +
 "            overflow-y: auto;\n" +
 "        }\n" +
-"        .simba-marker {\n" +
-"            background-color: #ff4444;\n" +
-"            border: 2px solid #cc0000;\n" +
-"            border-radius: 50%;\n" +
-"            width: 12px;\n" +
-"            height: 12px;\n" +
-"        }\n" +
-"        .route-line {\n" +
-"            stroke: #000000;\n" +
-"            stroke-width: 4;\n" +
-"            fill: none;\n" +
-"        }\n" +
-"        .route-line-selected {\n" +
-"            stroke: #0066ff;\n" +
-"            stroke-width: 6;\n" +
-"            fill: none;\n" +
+"        #missing-coords {\n" +
+"            position: absolute;\n" +
+"            bottom: 10px;\n" +
+"            left: 10px;\n" +
+"            background: #fff3cd;\n" +
+"            border: 1px solid #ffc107;\n" +
+"            padding: 10px 15px;\n" +
+"            border-radius: 6px;\n" +
+"            z-index: 1000;\n" +
+"            font-size: 13px;\n" +
+"            display: none;\n" +
 "        }\n" +
 "    </style>\n" +
 "</head>\n" +
@@ -91,25 +86,107 @@ public class MapService {
 "        <h3 style='margin-top: 0;'>Informations</h3>\n" +
 "        <div id='info-content'></div>\n" +
 "    </div>\n" +
+"    <div id='missing-coords'>\n" +
+"        ⚠️ <strong>Routes non affichées (coordonnées manquantes) :</strong> <span id='missing-list'></span>\n" +
+"    </div>\n" +
 "\n" +
 "    <!-- Leaflet JS -->\n" +
 "    <script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>\n" +
 "    \n" +
 "    <script>\n" +
 "        // Coordonnées de Madagascar (centre approximatif)\n" +
-"        const MADAGASCAR_CENTER = [-18.8792, 47.5079];\n" +
+"        const MADAGASCAR_CENTER = [-20.0, 47.0];\n" +
 "        \n" +
-"        // Coordonnées approximatives des villes principales\n" +
+"        // Coordonnées de TOUTES les villes principales de Madagascar\n" +
 "        const CITY_COORDS = {\n" +
-"            'Antananarivo': [-18.8792, 47.5079],\n" +
-"            'Toamasina': [-18.1443, 49.4026],\n" +
-"            'Antsirabe': [-19.8658, 47.0368],\n" +
-"            'Sambaina': [-19.0000, 47.2000],\n" +
-"            'Ampefy': [-19.0333, 46.7167]\n" +
+"            // Grandes villes\n" +
+"            'Antananarivo': [-18.9141, 47.5370],\n" +
+"            'Toamasina':    [-18.1443, 49.4026],\n" +
+"            'Antsirabe':    [-19.8658, 47.0368],\n" +
+"            'Toliara':      [-23.5392, 43.5694],\n" +
+"            'Mahajanga':    [-15.6667, 46.1667],\n" +
+"            'Antsiranana':  [-12.2808, 49.2967],\n" +
+"            'Fianarantsoa': [-20.4535, 47.1081],\n" +
+"            'Tulear':       [-23.5392, 43.5694],\n" +
+"\n" +
+"            // Villes moyennes\n" +
+"            'Sambaina':     [-19.0000, 47.2000],\n" +
+"            'Ampefy':       [-19.0333, 46.7167],\n" +
+"            'Ambohitanjaka':[-18.9833, 47.4500],\n" +
+"            'Ambanja':      [-13.4000, 48.0167],\n" +
+"            'Antalaha':     [-16.9000, 49.8833],\n" +
+"            'Masoala':      [-15.9167, 50.1500],\n" +
+"            'Mananara':     [-16.2667, 49.7667],\n" +
+"            'Mananjara':    [-16.2167, 49.7500],\n" +
+"            'Soubra':       [-17.3000, 49.7167],\n" +
+"            'Nosy Be':      [-13.5333, 48.4000],\n" +
+"            'Diego Suarez': [-12.2808, 49.2967],\n" +
+"            'Majunga':      [-15.6667, 46.1667],\n" +
+"            'Mombasa':      [-15.6667, 46.1667],\n" +
+"            'Morondava':    [-20.1000, 44.0833],\n" +
+"            'Fort Dauphin':  [-25.0333, 46.9833],\n" +
+"            'Fort-Dauphin':  [-25.0333, 46.9833],\n" +
+"            'Fte Dauphin':   [-25.0333, 46.9833],\n" +
+"            'Tolagnaro':    [-25.0333, 46.9833],\n" +
+"            'Farafangana':  [-24.4333, 47.5167],\n" +
+"            'Ihosy':        [-22.3833, 46.0167],\n" +
+"            'Betioky':      [-22.7167, 44.3667],\n" +
+"            'Ranohirya':    [-22.5000, 45.5000],\n" +
+"            'Ifaty':        [-23.0833, 43.6167],\n" +
+"            'Manakara':     [-24.2667, 47.5167],\n" +
+"            'Mananjary':    [-23.9667, 48.1000],\n" +
+"            'Nosy Boraha':  [-23.5833, 47.6167],\n" +
+"            'Ambilobe':     [-13.1667, 48.8500],\n" +
+"            'Ankarana':     [-13.5833, 48.8000],\n" +
+"            'Kie':          [-14.3333, 48.3833],\n" +
+"            'Madamongou':   [-14.6667, 48.1833],\n" +
+"            'Vohemar':      [-14.3167, 49.7833],\n" +
+"            'Vohémar':      [-14.3167, 49.7833],\n" +
+"            'Ankalambe':    [-14.8333, 48.6667],\n" +
+"            'Ambongandrefana': [-15.0000, 49.0000],\n" +
+"            'Belo-sur-Tsiribihina': [-19.4833, 44.6500],\n" +
+"            'Manara':       [-16.2000, 49.7000],\n" +
+"            'Barrages':     [-16.5000, 49.0000],\n" +
+"            'Ankarana Reserve': [-13.5833, 48.8000],\n" +
+"            'Ambohidrabibi': [-19.0000, 47.1000],\n" +
+"            'Vakinankaratra': [-19.5000, 47.0000],\n" +
+"            'Vakinankaratra': [-19.5000, 47.0000],\n" +
+"            'Betampona':    [-17.9333, 49.3500],\n" +
+"            'Pangalanes':   [-20.6667, 48.5000],\n" +
+"            'Rakirovira':   [-17.4833, 49.5000],\n" +
+"            'Maroantsetra': [-16.4000, 49.9167],\n" +
+"            'Masoala':      [-15.9167, 50.1500],\n" +
+"            'Ile Sainte-Marie': [-17.1333, 49.5500],\n" +
+"            'Ile aux Nattes': [-17.3833, 49.6667],\n" +
+"            'Sokirina':     [-18.4167, 49.0500],\n" +
+"            'Vatomandry':   [-18.8333, 48.8000],\n" +
+"            'Elapona':      [-18.9500, 48.3167],\n" +
+"            'SLambda':      [-18.6333, 48.9500],\n" +
+"            'Manara':       [-18.4500, 49.0000],\n" +
+"            'Deported':     [-18.6000, 49.0500],\n" +
+"            'Soatraka':     [-18.6500, 49.1000],\n" +
+"            'Amparaibe':    [-18.0333, 49.3000],\n" +
+"            'Foulpointe':   [-18.2333, 49.4333],\n" +
+"            'Andevoranto':  [-18.7000, 48.9000],\n" +
+"            'Ambanja':      [-13.4000, 48.0167],\n" +
+"            'Antalaha':     [-16.9000, 49.8833],\n" +
+"            'Andringitra':  [-21.7333, 46.6000],\n" +
+"            'Ranomafana':   [-21.2500, 47.4333],\n" +
+"            'Ambohy':       [-19.0000, 46.7000],\n" +
+"            'Miarinarivo':  [-19.0000, 47.7500],\n" +
+"            'Moramanga':    [-18.6833, 48.3833],\n" +
+"            'Ambatomitsuka': [-18.7500, 48.4500],\n" +
+"            'Amba':         [-19.0500, 47.5000],\n" +
+"            'Anosy':        [-24.5000, 47.0000],\n" +
+"            'Araroba':      [-24.0000, 47.0000],\n" +
+"            'Kambana':      [-22.0000, 47.0000],\n" +
+"            'Safo':         [-18.0000, 47.3000],\n" +
+"            'Tsarabarivar': [-19.4500, 46.8500],\n" +
+"            'Kalimanzo':    [-19.3000, 46.7500]\n" +
 "        };\n" +
 "        \n" +
 "        // Initialiser la carte\n" +
-"        const map = L.map('map').setView(MADAGASCAR_CENTER, 7);\n" +
+"        const map = L.map('map').setView(MADAGASCAR_CENTER, 6);\n" +
 "        \n" +
 "        // Ajouter le fond de carte OpenStreetMap\n" +
 "        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {\n" +
@@ -122,6 +199,7 @@ public class MapService {
 "        let routeLayers = {};\n" +
 "        let simbaMarkers = {};\n" +
 "        let selectedRN = null;\n" +
+"        let missingRoutes = [];\n" +
 "        \n" +
 "        // Charger les données depuis l'API\n" +
 "        async function chargerDonnees() {\n" +
@@ -146,6 +224,7 @@ public class MapService {
 "            \n" +
 "            routeLayers = {};\n" +
 "            simbaMarkers = {};\n" +
+"            missingRoutes = [];\n" +
 "            \n" +
 "            // Afficher chaque route\n" +
 "            routesData.forEach(route => {\n" +
@@ -153,7 +232,13 @@ public class MapService {
 "                const coordFin = CITY_COORDS[route.extremiteDroite];\n" +
 "                \n" +
 "                if (!coordDebut || !coordFin) {\n" +
-"                    console.warn('Coordonnées manquantes pour:', route.nom);\n" +
+"                    // Collecter les routes manquantes pour les afficher\n" +
+"                    let msg = route.nom + ' (';\n" +
+"                    if (!coordDebut) msg += route.extremiteGauche + ' ';\n" +
+"                    if (!coordFin)   msg += route.extremiteDroite;\n" +
+"                    msg += ')';\n" +
+"                    missingRoutes.push(msg);\n" +
+"                    console.warn('Coordonnées manquantes pour:', route.nom, route.extremiteGauche, route.extremiteDroite);\n" +
 "                    return;\n" +
 "                }\n" +
 "                \n" +
@@ -168,15 +253,29 @@ public class MapService {
 "                    }\n" +
 "                ).addTo(map);\n" +
 "                \n" +
+"                // Label du nom de la route\n" +
+"                const midLat = (coordDebut[0] + coordFin[0]) / 2;\n" +
+"                const midLng = (coordDebut[1] + coordFin[1]) / 2;\n" +
+"                L.marker([midLat, midLng], {\n" +
+"                    icon: L.divIcon({\n" +
+"                        className: '',\n" +
+"                        html: '<div style=\"background:white;border:1px solid #ccc;border-radius:4px;padding:2px 6px;font-size:11px;font-weight:bold;white-space:nowrap;\">' + route.nom + '</div>',\n" +
+"                        iconSize: [50, 20],\n" +
+"                        iconAnchor: [25, 10]\n" +
+"                    })\n" +
+"                }).addTo(map);\n" +
+"                \n" +
 "                // Popup pour la route\n" +
 "                routeLine.bindPopup(\n" +
-"                    `<b>${route.nom}</b><br>` +\n" +
-"                    `Distance: ${route.distance} km<br>` +\n" +
-"                    `SIMBA: ${route.simbas.length}`\n" +
+"                    '<b>' + route.nom + '</b><br>' +\n" +
+"                    'Distance: ' + route.distance + ' km<br>' +\n" +
+"                    'De: ' + route.extremiteGauche + '<br>' +\n" +
+"                    'À: ' + route.extremiteDroite + '<br>' +\n" +
+"                    'SIMBA: ' + route.simbas.length\n" +
 "                );\n" +
 "                \n" +
 "                // Événement de clic sur la route\n" +
-"                routeLine.on('click', () => {\n" +
+"                routeLine.on('click', function() {\n" +
 "                    selectionnerRN(route.nom);\n" +
 "                    afficherInfosRoute(route);\n" +
 "                    envoyerCommandeVersJava('selectRN', route.nom);\n" +
@@ -190,13 +289,22 @@ public class MapService {
 "                    map.fitBounds(routeLine.getBounds(), { padding: [50, 50] });\n" +
 "                }\n" +
 "            });\n" +
+"            \n" +
+"            // Afficher l'avertissement si des routes manquent\n" +
+"            const missingDiv = document.getElementById('missing-coords');\n" +
+"            if (missingRoutes.length > 0) {\n" +
+"                document.getElementById('missing-list').textContent = missingRoutes.join(' | ');\n" +
+"                missingDiv.style.display = 'block';\n" +
+"            } else {\n" +
+"                missingDiv.style.display = 'none';\n" +
+"            }\n" +
 "        }\n" +
 "        \n" +
 "        // Afficher les SIMBA d'une route\n" +
 "        function afficherSIMBA(route, coordDebut, coordFin) {\n" +
 "            const markers = [];\n" +
 "            \n" +
-"            route.simbas.forEach((simba, index) => {\n" +
+"            route.simbas.forEach(function(simba, index) {\n" +
 "                // Calculer la position du SIMBA le long de la route\n" +
 "                const ratio = simba.pk / route.distance;\n" +
 "                const lat = coordDebut[0] + (coordFin[0] - coordDebut[0]) * ratio;\n" +
@@ -214,14 +322,14 @@ public class MapService {
 "                \n" +
 "                // Popup pour le SIMBA\n" +
 "                marker.bindPopup(\n" +
-"                    `<b>SIMBA ${index + 1}</b><br>` +\n" +
-"                    `PK: ${simba.pk.toFixed(2)} km<br>` +\n" +
-"                    `Surface: ${simba.surface.toFixed(2)} m²<br>` +\n" +
-"                    `Profondeur: ${simba.profondeur.toFixed(2)} m`\n" +
+"                    '<b>SIMBA ' + (index + 1) + '</b><br>' +\n" +
+"                    'PK: ' + simba.pk.toFixed(2) + ' km<br>' +\n" +
+"                    'Surface: ' + simba.surface.toFixed(2) + ' m²<br>' +\n" +
+"                    'Profondeur: ' + simba.profondeur.toFixed(2) + ' m'\n" +
 "                );\n" +
 "                \n" +
 "                // Événement de clic\n" +
-"                marker.on('click', () => {\n" +
+"                marker.on('click', function() {\n" +
 "                    afficherInfosSIMBA(simba, index + 1);\n" +
 "                });\n" +
 "                \n" +
@@ -243,11 +351,11 @@ public class MapService {
 "            const infoContent = document.getElementById('info-content');\n" +
 "            \n" +
 "            infoContent.innerHTML = \n" +
-"                `<h4 style='margin: 0 0 10px 0; color: #0066ff;'>${route.nom}</h4>` +\n" +
-"                `<p style='margin: 5px 0;'><strong>Distance:</strong> ${route.distance} km</p>` +\n" +
-"                `<p style='margin: 5px 0;'><strong>Départ:</strong> ${route.extremiteGauche}</p>` +\n" +
-"                `<p style='margin: 5px 0;'><strong>Arrivée:</strong> ${route.extremiteDroite}</p>` +\n" +
-"                `<p style='margin: 5px 0;'><strong>SIMBA:</strong> ${route.simbas.length}</p>`;\n" +
+"                '<h4 style=\"margin: 0 0 10px 0; color: #0066ff;\">' + route.nom + '</h4>' +\n" +
+"                '<p style=\"margin: 5px 0;\"><strong>Distance:</strong> ' + route.distance + ' km</p>' +\n" +
+"                '<p style=\"margin: 5px 0;\"><strong>Départ:</strong> ' + route.extremiteGauche + '</p>' +\n" +
+"                '<p style=\"margin: 5px 0;\"><strong>Arrivée:</strong> ' + route.extremiteDroite + '</p>' +\n" +
+"                '<p style=\"margin: 5px 0;\"><strong>SIMBA:</strong> ' + route.simbas.length + '</p>';\n" +
 "            \n" +
 "            infoBox.style.display = 'block';\n" +
 "        }\n" +
@@ -258,10 +366,10 @@ public class MapService {
 "            const infoContent = document.getElementById('info-content');\n" +
 "            \n" +
 "            infoContent.innerHTML = \n" +
-"                `<h4 style='margin: 0 0 10px 0; color: #ff4444;'>SIMBA ${numero}</h4>` +\n" +
-"                `<p style='margin: 5px 0;'><strong>PK:</strong> ${simba.pk.toFixed(2)} km</p>` +\n" +
-"                `<p style='margin: 5px 0;'><strong>Surface:</strong> ${simba.surface.toFixed(2)} m²</p>` +\n" +
-"                `<p style='margin: 5px 0;'><strong>Profondeur:</strong> ${simba.profondeur.toFixed(2)} m</p>`;\n" +
+"                '<h4 style=\"margin: 0 0 10px 0; color: #ff4444;\">SIMBA ' + numero + '</h4>' +\n" +
+"                '<p style=\"margin: 5px 0;\"><strong>PK:</strong> ' + simba.pk.toFixed(2) + ' km</p>' +\n" +
+"                '<p style=\"margin: 5px 0;\"><strong>Surface:</strong> ' + simba.surface.toFixed(2) + ' m²</p>' +\n" +
+"                '<p style=\"margin: 5px 0;\"><strong>Profondeur:</strong> ' + simba.profondeur.toFixed(2) + ' m</p>';\n" +
 "            \n" +
 "            infoBox.style.display = 'block';\n" +
 "        }\n" +
@@ -282,8 +390,8 @@ public class MapService {
 "        // Charger les données au démarrage\n" +
 "        chargerDonnees();\n" +
 "        \n" +
-"        // Actualiser les données toutes les 2 secondes\n" +
-"        setInterval(chargerDonnees, 2000);\n" +
+"        // Actualiser les données toutes les 3 secondes\n" +
+"        setInterval(chargerDonnees, 3000);\n" +
 "    </script>\n" +
 "</body>\n" +
 "</html>";

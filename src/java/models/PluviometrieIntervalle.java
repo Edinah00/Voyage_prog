@@ -1,4 +1,4 @@
-package src.java.models;
+package models;
 
 /**
  * Représente un intervalle de pluviométrie associé à un matériau de réparation.

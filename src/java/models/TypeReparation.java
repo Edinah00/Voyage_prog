@@ -1,4 +1,4 @@
-package src.java.models;
+package models;
 
 public class TypeReparation {
     private int id;

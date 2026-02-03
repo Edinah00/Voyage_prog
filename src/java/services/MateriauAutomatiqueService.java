@@ -1,10 +1,10 @@
-package src.java.services;
+package services;
 
-import src.java.dao.PluviometrieDAO;
-import src.java.dao.PluviometrieIntervalleDAO;
-import src.java.models.Pluviometrie;
-import src.java.models.PluviometrieIntervalle;
-import src.java.models.Simba;
+import dao.PluviometrieDAO;
+import dao.PluviometrieIntervalleDAO;
+import models.Pluviometrie;
+import models.PluviometrieIntervalle;
+import models.Simba;
 import java.sql.SQLException;
 
 /**

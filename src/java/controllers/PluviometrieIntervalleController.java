@@ -1,4 +1,4 @@
-package src.java.controllers;
+package controllers;
 
 import java.awt.*;
 import java.sql.SQLException;
@@ -7,8 +7,8 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
-import src.java.dao.PluviometrieIntervalleDAO;
-import src.java.models.PluviometrieIntervalle;
+import dao.PluviometrieIntervalleDAO;
+import models.PluviometrieIntervalle;
 
 /**
  * Contrôleur pour gérer l'ajout multiple d'intervalles de pluviométrie

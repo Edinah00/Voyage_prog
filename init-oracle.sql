@@ -125,8 +125,10 @@ COMMIT;
 
 
 
+INSERT INTO lalana (nom, extremite_gauche, extremite_droite, distance, largeur) 
+VALUES ('RN7', 'Antananarivo', 'Toliara', 1000.0, 7.5);
 
-
+COMMIT;
 
 
 

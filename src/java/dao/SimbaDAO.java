@@ -1,7 +1,7 @@
-package src.java.dao;
+package dao;
 
-import src.java.models.Lalana;
-import src.java.models.Simba;
+import models.Lalana;
+import models.Simba;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

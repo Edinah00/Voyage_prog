@@ -1,4 +1,4 @@
-package src.java.models;
+package models;
 
 public class PrixReparation {
     private int id;

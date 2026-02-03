@@ -1,7 +1,7 @@
-package src.java.dao;
+package dao;
 
-import src.java.models.Pause;
-import src.java.models.Lalana;
+import models.Pause;
+import models.Lalana;
 import java.sql.*;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;

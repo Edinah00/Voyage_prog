@@ -1,6 +1,6 @@
-package src.java.dao;
+package dao;
 
-import src.java.models.Pluviometrie;
+import models.Pluviometrie;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

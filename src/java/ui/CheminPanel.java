@@ -1,11 +1,11 @@
-package src.java.ui;
+package ui;
 
 import java.awt.*;
 import javax.swing.*;
-import src.java.models.CheminItem;
-import src.java.models.Lalana;
-import src.java.models.Lavaka;
-import src.java.models.Voyage;
+import models.CheminItem;
+import models.Lalana;
+import models.Lavaka;
+import models.Voyage;
 
 public class CheminPanel extends JPanel {
     private boolean afficherChemin = false;

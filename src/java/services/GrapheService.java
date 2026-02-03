@@ -1,10 +1,10 @@
-package src.java.services;
+package services;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import src.java.models.Lalana;
+import models.Lalana;
 
 public class GrapheService {
 

@@ -1,4 +1,4 @@
-package src.java.controllers;
+package controllers;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -18,9 +18,9 @@ import com.sun.net.httpserver.HttpExchange;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import com.google.gson.Gson;
-import src.java.dao.*;
-import src.java.models.*;
-import src.java.services.MapService;
+import dao.*;
+import models.*;
+import services.MapService;
 
 /**
  * Contrôleur pour la carte SIG interactive
@@ -200,7 +200,7 @@ public class MapController extends JDialog {
             }
             
             // Envoyer les données à la carte
-            envoyerDonneesVerscarte();
+            envoyerDonneesVersCart();
             
         } catch (SQLException e) {
             showError("Erreur lors du chargement des données: " + e.getMessage());

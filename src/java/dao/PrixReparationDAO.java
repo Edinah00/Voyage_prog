@@ -1,6 +1,6 @@
-package src.java.dao;
+package dao;
 
-import src.java.models.PrixReparation;
+import models.PrixReparation;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;

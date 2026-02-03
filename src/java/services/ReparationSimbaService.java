@@ -1,8 +1,8 @@
-package src.java.services;
+package services;
 
-import src.java.dao.ReparationDAO;
-import src.java.models.Reparation;
-import src.java.models.Simba;
+import dao.ReparationDAO;
+import models.Reparation;
+import models.Simba;
 import java.sql.SQLException;
 import java.util.List;
 

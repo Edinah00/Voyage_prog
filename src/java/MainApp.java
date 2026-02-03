@@ -1,4 +1,4 @@
-package src.java;
+
 
 import java.awt.*;
 import java.awt.event.*;
@@ -8,15 +8,15 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import src.java.controllers.*;
-import src.java.dao.*;
-import src.java.models.*;
-import src.java.services.*;
-import src.java.ui.*;
+import controllers.*;
+import dao.*;
+import models.*;
+import services.*;
+import ui.*;
 
 public class MainApp extends JFrame {
 
-   private JComboBox<String> cbDepart;
+    private JComboBox<String> cbDepart;
     private JComboBox<String> cbArrivee;
     private JComboBox<Voiture> cbVoiture;
     private JTextField txtVitesseMoyenne;
@@ -93,9 +93,6 @@ public class MainApp extends JFrame {
         JButton btnGererIntervalles = new JButton("Intervalles Pluie");
         btnGererIntervalles.addActionListener(e -> ouvrirGestionIntervalles());
 
-        // ═══════════════════════════════════════════════════════════════
-        // NOUVEAU : Bouton Carte SIG
-        // ═══════════════════════════════════════════════════════════════
         JButton btnCarteSIG = new JButton("🗺️ Carte SIG");
         btnCarteSIG.addActionListener(e -> ouvrirCarteSIG());
 
@@ -118,14 +115,11 @@ public class MainApp extends JFrame {
         JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         mainPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // ═══════════════════════════════════════════════════════════════
-        // MODIFIÉ : Ajout du paramètre btnCarteSIG à creerPanelHaut
-        // ═══════════════════════════════════════════════════════════════
         mainPanel.add(PanelFactory.creerPanelHaut(
                 cbDepart, cbArrivee, cbVoiture, txtVitesseMoyenne, txtHeureDepart,
                 btnRechercher, btnGererLavaka, btnGererPause, btnGererReparation,
                 btnGererSimba, btnCalculerCout, btnGererPluviometrie, btnGererIntervalles,
-                btnCarteSIG,  // ← NOUVEAU PARAMÈTRE
+                btnCarteSIG,
                 btnReinitialiser,
                 () -> {
                     mettreAJourVitesseMoyenne();
@@ -166,6 +160,13 @@ public class MainApp extends JFrame {
             cbVoiture.addItem(v);
         }
         mettreAJourVitesseMoyenne();
+    }
+
+    private void mettreAJourVitesseMoyenne() {
+        Voiture voiture = (Voiture) cbVoiture.getSelectedItem();
+        if (voiture != null) {
+            txtVitesseMoyenne.setText(String.valueOf((int) voiture.getVitesseMaximale()));
+        }
     }
 
     private void chargerDonnees() {
@@ -563,27 +564,6 @@ public class MainApp extends JFrame {
         controller.setVisible(true);
     }
 
-    private void showError(String message) {
-        JOptionPane.showMessageDialog(this, message, "Erreur", JOptionPane.ERROR_MESSAGE);
-    }
-
-    private void showInfo(String message) {
-        JOptionPane.showMessageDialog(this, message, "Information", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    @Override
-    public void dispose() {
-        if (animationTimer != null) {
-            animationTimer.stop();
-        }
-        try {
-            DatabaseConnection.closeAllConnections();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        super.dispose();
-    }
-
     private void ouvrirGestionPluviometrie() {
         PluviometrieController controller = new PluviometrieController(this);
         controller.setVisible(true);
@@ -594,9 +574,6 @@ public class MainApp extends JFrame {
         controller.setVisible(true);
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // NOUVELLE MÉTHODE : Ouvrir la carte SIG
-    // ═══════════════════════════════════════════════════════════════
     private void ouvrirCarteSIG() {
         MapController mapController = new MapController(this);
         mapController.setVisible(true);
@@ -622,6 +599,7 @@ public class MainApp extends JFrame {
         }
         super.dispose();
     }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> new MainApp());
     }

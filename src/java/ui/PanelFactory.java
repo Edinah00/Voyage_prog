@@ -1,10 +1,10 @@
-package src.java.ui;
+package ui;
 
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import src.java.models.CheminItem;
-import src.java.models.Voiture;
+import models.CheminItem;
+import models.Voiture;
 
 public class PanelFactory {
 
@@ -20,8 +20,9 @@ public class PanelFactory {
             JButton btnGererReparation,
             JButton btnGererSimba,
             JButton btnCalculerCout,
-            JButton btnGererPluviometrie,      // NOUVEAU
-            JButton btnGererIntervalles,       // NOUVEAU
+            JButton btnGererPluviometrie,
+            JButton btnGererIntervalles,
+            JButton btnCarteSIG,              // ← NOUVEAU PARAMÈTRE
             JButton btnReinitialiser,
             Runnable onVoitureChanged,
             Runnable onReinitialiser) {
@@ -94,7 +95,7 @@ public class PanelFactory {
         gbc2.fill = GridBagConstraints.HORIZONTAL;
         gbc2.weightx = 1.0;
 
-        // STYLE NOIR ET BLANC
+        // STYLE NOIR ET BLANC pour tous les boutons
         btnGererLavaka.setBackground(Color.BLACK);
         btnGererLavaka.setForeground(Color.WHITE);
         btnGererLavaka.setFocusPainted(false);
@@ -115,7 +116,6 @@ public class PanelFactory {
         btnCalculerCout.setForeground(Color.WHITE);
         btnCalculerCout.setFocusPainted(false);
 
-        // NOUVEAUX BOUTONS - Style noir et blanc
         btnGererPluviometrie.setBackground(Color.BLACK);
         btnGererPluviometrie.setForeground(Color.WHITE);
         btnGererPluviometrie.setFocusPainted(false);
@@ -124,7 +124,14 @@ public class PanelFactory {
         btnGererIntervalles.setForeground(Color.WHITE);
         btnGererIntervalles.setFocusPainted(false);
 
-        // Ajout des boutons
+        // ═══════════════════════════════════════════════════════════════
+        // NOUVEAU : Style pour le bouton Carte SIG
+        // ═══════════════════════════════════════════════════════════════
+        btnCarteSIG.setBackground(Color.BLACK);
+        btnCarteSIG.setForeground(Color.WHITE);
+        btnCarteSIG.setFocusPainted(false);
+
+        // Ajout des boutons dans l'ordre
         gbc2.gridx = 0; gbc2.gridy = 0;
         blocDroit.add(btnGererLavaka, gbc2);
 
@@ -140,15 +147,20 @@ public class PanelFactory {
         gbc2.gridy = 4;
         blocDroit.add(btnCalculerCout, gbc2);
 
-        // NOUVEAUX BOUTONS
         gbc2.gridy = 5;
         blocDroit.add(btnGererPluviometrie, gbc2);
 
         gbc2.gridy = 6;
         blocDroit.add(btnGererIntervalles, gbc2);
 
-        // Ajouter un espace vide pour aligner
+        // ═══════════════════════════════════════════════════════════════
+        // NOUVEAU : Ajout du bouton Carte SIG
+        // ═══════════════════════════════════════════════════════════════
         gbc2.gridy = 7;
+        blocDroit.add(btnCarteSIG, gbc2);
+
+        // Ajouter un espace vide pour aligner
+        gbc2.gridy = 8;
         gbc2.weighty = 1.0;
         gbc2.fill = GridBagConstraints.BOTH;
         blocDroit.add(new JPanel(), gbc2);

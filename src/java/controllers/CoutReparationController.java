@@ -1,4 +1,4 @@
-package src.java.controllers;
+package controllers;
 
 import java.awt.*;
 import java.sql.SQLException;
@@ -11,14 +11,14 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import src.java.dao.ReparationDAO;
-import src.java.dao.SimbaDAO;
-import src.java.models.Lalana;
-import src.java.models.Reparation;
-import src.java.models.Simba;
-import src.java.services.ReparationSimbaService;
-import src.java.services.MateriauAutomatiqueService;
-import src.java.services.MateriauAutomatiqueService.MateriauNotFoundException;
+import dao.ReparationDAO;
+import dao.SimbaDAO;
+import models.Lalana;
+import models.Reparation;
+import models.Simba;
+import services.ReparationSimbaService;
+import services.MateriauAutomatiqueService;
+import services.MateriauAutomatiqueService.MateriauNotFoundException;
 
 /**
  * Contrôleur pour calculer automatiquement le coût de réparation des Simba
