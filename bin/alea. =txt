@@ -1,0 +1,19 @@
+TO  DO 
+Voici mon projet à l'intégrale .  Je veux changer un peu le design en noir et blanc  ET ajouter une fonctionnalité .
+
+Pour la reparation je veux ajouter une fonction de pluviometrie . On a déjà le Simba . Creons les tables pluviometrie(debut (dans un lalana),fin (dans un lalana), quantité) avec sa classe correspdante et aussi pluviometrie Intervalle (quantité max , quantité min , materiau )  . Tout d'abord je veux que pour reparer , on ne va plus selectionner les materiaux mais ça va etre afficher prealablement  là ou il  y a la selection . 
+
+Avant d'entrer dans la page reparer   , on doit encore creer une bouton en haut de l'application  pour entrer dans l' onglet ajouter ,  
+
+
+
+
+
+
+Objectif: calculer la vitesse moyenne reels  entre deux points  (en incluant le vitesse moyenne (ralentissement ) pendant les lavakas)
+  on doit avoir deux fonction 
+    la premiere sera dans la page principale src/views/mainApp : pour decomposer le route (lalana) ,pour avoir les lavaka , ainsi point de depart et point d'arriveer lavaka
+    la deuxieme sera dans la classe voiture ; ce sera une fonction qui va calculer la vitesse entre chaque lavaka , les sommer et les diviser par la distance de deux point pour avoir  la vitesse moyenne reells
+         VitesseMoyenneReele =((vitesseMoyennepremierepartieSansLavaka*Sadistance + VitesseMoyennepremiere avecLavaka *Sadistance + ainsi de suite pour les lavaka et les parties sans lavaka trouvé=..))/ distancetotalesDesDeux point
+
+Cette VitesseMoyenneReele sera à afficher dans la fenetre .

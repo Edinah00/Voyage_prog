@@ -161,7 +161,7 @@ public class PluviometrieDAO {
     /**
      * Supprime une zone de pluviométrie
      */
-    public void delete(int id) throws SQLException {
+   public void delete(int id) throws SQLException {
         String sql = "DELETE FROM pluviometrie WHERE id = ?";
         
         Connection conn = DatabaseConnection.getOracleConnection();
